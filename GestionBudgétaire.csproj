@@ -7,15 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Data\Contracts\" />
-    <Folder Include="Data\Entities\Database\" />
-    <Folder Include="Data\Entities\Custom\" />
-    <Folder Include="Data\Services\" />
-    <Folder Include="Shared\" />
-    <Folder Include="Pages\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Authentication.Negotiate" Version="8.0.15" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.15" />
     <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="8.0.3" />
