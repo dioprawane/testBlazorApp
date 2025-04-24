@@ -1,14 +1,16 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace GestionBudgétaire.Data.Entities.Database
 {
+    [Table("DIALOGUE_GESTION")]
     public class Dialogue
     {
         [Key]
-        public int DGCODE { get; set; }
+        public int DG_CODE { get; set; }
         public int? ANNEE { get; set; } = 0;
-        public string? SERIES_DE_DEDONNEES { get; set; } = string.Empty;
-        public DateTime? DATE { get; set; } = null;
+        public string? SERIES_DE_DONNEES { get; set; } = string.Empty;
+        public DateTime? DG_DATE { get; set; } = null;
         public string? SERIE_DATE { get; set; } = string.Empty;
         public int? LINE_TO_USE { get; set; } = 0;
         public string? MACRO_DESIGNATION { get; set; } = string.Empty;
@@ -32,8 +34,8 @@ namespace GestionBudgétaire.Data.Entities.Database
         public string? CODE_PROJET_STANDARDISE { get; set; } = string.Empty;
         public string? LIBELLE_PROJET { get; set; } = string.Empty;
         public string? STATUT_PROJET { get; set; } = string.Empty;
-        public decimal? COMPTES_BUDGETAIRES { get; set; } = 0;
-        public decimal? COMPTES_COMPTABLES { get; set; } = 0;
+        public string? COMPTES_BUDGETAIRES { get; set; } = string.Empty;
+        public string? COMPTES_COMPTABLES { get; set; } = string.Empty;
         public string? DA_STANDARDISE { get; set; } = string.Empty;
         public string? PORTEFEUILLE_STANDARDISE { get; set; } = string.Empty;
         public string? SOUS_PORTEFEUILLE_STANDARDISE { get; set; } = string.Empty;

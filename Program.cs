@@ -3,6 +3,7 @@ using GestionBudgétaire.Data;
 using Microsoft.EntityFrameworkCore;
 using Serilog.Events;
 using Serilog;
+using GestionBudgétaire.Services;
 
 namespace GestionBudgétaire
 {
@@ -47,7 +48,10 @@ namespace GestionBudgétaire
             }
 
             builder.Services.AddDbContextFactory<ApplicationDbContext>(options =>
-                options.UseMySql(connectionString, new MySqlServerVersion(new Version(8, 0, 21))));
+                options.UseMySql(connectionString + ";AllowZeroDateTime=True;ConvertZeroDateTime=True", // Les 2 derniers param pour accepter des dates "0000-00-00"
+                new MySqlServerVersion(new Version(8, 0, 21))));
+
+            builder.Services.AddScoped<TestService>(); // Service de Test
 
             var app = builder.Build();
 
