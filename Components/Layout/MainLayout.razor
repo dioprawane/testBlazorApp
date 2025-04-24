@@ -1,6 +1,13 @@
 ﻿@inherits LayoutComponentBase
 
 @Body
+@* la ligne ci-dessous permet l'utilisation des Dialog, Notification, ContextMenu et Tooltip de Radzen *@
+@* Il faut fixer la valeur du rendermode à la même valeur que dans le fichier App.razor *@
+
+<RadzenComponents @rendermode="InteractiveServer" />
+<RadzenDialog />
+<RadzenNotification />
+<RadzenComponents />
 
 <div id="blazor-error-ui">
     An unhandled error has occurred.
