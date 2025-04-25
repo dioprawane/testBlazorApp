@@ -33,6 +33,7 @@ namespace GestionBudgétaire
             // Add services to the container.
             builder.Services.AddRazorComponents()
                 .AddInteractiveServerComponents();
+            //builder.Services.AddRadzenComponents();
 
             // Gestion de la base de donn�es
             string? connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
