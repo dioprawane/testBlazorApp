@@ -1,0 +1,31 @@
+﻿/* custom.css */
+.navbar {
+    background-color: #ADD8E6; /* Bleu clair */
+}
+
+.navbar-nav {
+    align-items: center;
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.nav-item {
+    flex: 1;
+    text-align: center;
+}
+
+.nav-link {
+    color: #ffffff;
+    display: block;
+    padding: 0.5rem 1rem;
+}
+
+    .nav-link i {
+        color: #ffffff; /* S'assure que les ic�nes sont blanches */
+        margin-right: 8px; /* Espacement entre l'ic�ne et le texte */
+    }
+
+    .nav-link:hover {
+        color: #dddddd;
+    }

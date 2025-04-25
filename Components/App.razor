@@ -8,6 +8,13 @@
     <link rel="stylesheet" href="app.css" />
     <link rel="stylesheet" href="GestionBudgétaire.styles.css" />
     <HeadOutlet @rendermode="InteractiveServer" />
+     <!--
+        JQ : La ligne ci-dessous ajoute le theme pour RadZen.
+        l'attribut rendermode doit avoir la même valeur que pour l'application
+        ligne juste au dessus.
+        en .net8 choix possibles : InteractiveServer, InteractiveWebAssembly ou InteractiveAuto.
+    -->
+    <RadzenTheme Theme="material" @rendermode="InteractiveServer" />
 </head>
 
 <body>

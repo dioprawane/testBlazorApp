@@ -1,0 +1,58 @@
+﻿@page "/test-db"
+@using GestionBudgétaire.Data.Entities.Database
+@using GestionBudgétaire.Data
+@using GestionBudgétaire.Services
+@inject TestService TestService
+
+<h3>Données de la table Dialogue</h3>
+
+@if (dialogues == null)
+{
+    <p>Chargement des données...</p>
+}
+else if (!dialogues.Any())
+{
+    <p>Aucune donnée trouvée.</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>DG_CODE</th>
+                <th>FOURNISSEUR</th>
+                <th>LIBELLE_DU_MARCHE</th>
+                <th>MONTANT_TTC</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in dialogues)
+            {
+                <tr>
+                    <td>@item.DG_CODE</td>
+                    <td>@item.FOURNISSEUR</td>
+                    <td>@item.LIBELLE_DU_MARCHE</td>
+                    <td>@item.MONTANT_TTC</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<Dialogue>? dialogues;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            dialogues = await TestService.GetDialoguesAsync();
+            // Limite l'affichage à 10 lignes
+            dialogues = dialogues.Take(10).ToList();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Erreur lors de la récupération des données : {ex.Message}");
+        }
+    }
+}
