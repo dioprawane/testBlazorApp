@@ -1,15 +1,12 @@
 using GestionBudgétaire.Components;
-
 using GestionBudgétaire.Data;
+using GestionBudgétaire.Data.Services;
+using GestionBudgétaire.Data.Services.ToBeRemoved;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.EntityFrameworkCore;
-using Serilog.Events;
-using Serilog;
-using GestionBudgétaire.Services;
-
-// JQ : pour Introduction du SSO windows
-// il faut ajouter Microsoft.AspNetCore.Authentication.Negotiate via nuget
-using Microsoft.AspNetCore.Authentication.Negotiate;
 using Radzen;
+using Serilog;
+using Serilog.Events;
 
 namespace GestionBudgétaire
 {
@@ -36,9 +33,9 @@ namespace GestionBudgétaire
                 // Créer l'instance de logger configurée
                 .CreateLogger();
 
-            // JQ : Ajout de l'authentification Windows (Negotiate)
-            builder.Services.AddAuthentication(NegotiateDefaults.AuthenticationScheme)
-                .AddNegotiate();
+            // JQ : Ajout de l'authentification Windows (Negotiate) A supprimer dans le cas ou on utilise l'authentification Windows sur IIS
+            //builder.Services.AddAuthentication(NegotiateDefaults.AuthenticationScheme)
+            //    .AddNegotiate();
             builder.Services.AddAuthorization(options =>
             {
                 //  JQ : Toutes les pages exigent une authentification par défaut
@@ -46,6 +43,9 @@ namespace GestionBudgétaire
             });
             //  JQ : Nécessaire pour le composant de revalidation du password AD
             builder.Services.AddHttpContextAccessor();
+
+            //  JQ : Service permettant d'ajouter les rôle applicatis au Claims de l'utilisateur Windows
+            builder.Services.AddScoped<IClaimsTransformation, CustomClaimsTransformer>();
 
             // JQ : ajout pour l'utilisation de RadZen
             builder.Services.AddRadzenComponents();
@@ -86,8 +86,6 @@ namespace GestionBudgétaire
 
             app.UseHttpsRedirection();
 
-            // JQ : Activation de l'authentification et de l'autorisation
-            app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseStaticFiles();
@@ -96,9 +94,6 @@ namespace GestionBudgétaire
             app.MapRazorComponents<App>()
                 .AddInteractiveServerRenderMode();
 
-            //app.Run();
-            // Exécution/Lancement de l'application web
-            //app.Run();
             try
             {
                 // Exécution/Lancement de l'application web

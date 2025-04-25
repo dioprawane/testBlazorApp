@@ -13,9 +13,16 @@ Welcome to your new app.
 
 <h3>Accueil sécurisé</h3>
 
+@* 
+   JQ : ci dessous quelques ajouts sur la home page provisoire pour tester les fonctionnalités 
+   sur les droits applicatifs
+*@
+
 @if (user != null)
 {
     <p>Votre identité @user.Identity?.Name !</p>
+    <GestionBudgétaire.Shared.UserProfile />
+    <GestionBudgétaire.Shared.UserRolesView />
 }
 else
 {

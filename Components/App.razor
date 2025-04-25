@@ -18,7 +18,14 @@
 </head>
 
 <body>
-    <Routes @rendermode="InteractiveServer" />
+    <!--
+        JQ : La ligne ci-dessous permet d'éviter que la méthode OnInitializedAsync()
+        des pages soit appelée deux fois. réf :
+        https://learn.microsoft.com/en-us/answers/questions/1621494/why-is-oninitializedasync()-called-twice-on-a-page
+    -->
+    <Routes @rendermode="new InteractiveServerRenderMode(prerender:false)" />
+    @* <Routes @rendermode="InteractiveServer" /> *@  <!-- ligne initiale par défaut -->
+    
     <script src="_framework/blazor.web.js"></script>
 </body>
 
