@@ -11,10 +11,10 @@ drop table if exists DIALOGUE_GESTION;
 /*==============================================================*/
 create table DIALOGUE_GESTION
 (
-   DG_CODE              bigint AUTO_INCREMENT,
-   ANNEE                bigint,
+   DG_CODE              int AUTO_INCREMENT,
+   ANNEE                int,
    SERIES_DE_DONNEES    varchar(50),
-   DATE                 date,
+   DG_DATE              date default null,
    SERIE_DATE           varchar(50),
    LINE_TO_USE          numeric(2,0),
    MACRO_DESIGNATION    varchar(100),
