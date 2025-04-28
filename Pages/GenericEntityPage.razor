@@ -1,0 +1,232 @@
+﻿@typeparam TEntity where TEntity : class
+
+@using Microsoft.AspNetCore.Components.Web
+@using Radzen
+@using Radzen.Blazor
+@using GestionBudgétaire.Shared
+@using GestionBudgétaire.Data.Services
+
+@inject IServiceProvider ServiceProvider
+@inject Radzen.DialogService DialogService
+@inject Radzen.NotificationService NotificationService
+
+<!-- JQ : Cette page permet d'afficher le contenu d'une table sous la forme 
+     d'un RadzenDatagrid en utilisant l'introspection sur le type objet des colonnes de la table.
+     Le RadzenDatagrid dispose de boutons et de la gestion du double clic sur une ligne pour implémenter
+     les fonctions CRUD de manière générique.
+-->
+
+<!-- JQ : TODO : Il faut ajouter les commentaires au code et sans doute voir si il n'y a
+     pas quelques bouts de code à supprimer suite au développement
+-->
+
+<!-- JQ : TODO : la partie gestion des couleurs ne fonctionne pas à revoir -->
+<style>
+    .rz-selectable .rz-datatable-even.rz-state-highlight .rz-cell-data,
+    .rz-selectable .rz-datatable-odd.rz-state-highlight .rz-cell-data {
+        color: red !important; /* JQ : Couleur du text */
+    }
+
+    .rz-selectable .rz-datatable-even.rz-state-highlight > td,
+    .rz-selectable .rz-datatable-odd.rz-state-highlight > td {
+        background-color: green !important; /* JQ : Couleur du background */
+    }
+
+    .rz-grid-table {
+        width: unset !important; /* JQ : Ceci permet aux colonnes de s'auto ajuster en largeur dans le datagrid */
+    }
+</style>
+
+<PageTitle>Gestion générique</PageTitle>
+
+<RadzenDataGrid TItem="TEntity" Data="@items" @ref="grid"
+                ColumnWidth="200px"
+                AllowPaging="true" PageSize="@pageSize"
+                RowDoubleClick="EditRow"
+                RowSelect="@(args => OnRowSelect(args))"
+                SelectionMode="DataGridSelectionMode.Single"
+                SelectedItem="@selectedItem"
+                @bind-Value="@selectedItems">
+    <Columns>
+        @foreach (var prop in typeof(TEntity).GetProperties())
+        {
+            if (HideFirstColumn && prop.Name == @IdPropertyName)
+                continue;
+
+            <RadzenDataGridColumn TItem="TEntity" Property="@prop.Name" Title="@prop.Name" />
+        }
+    </Columns>
+</RadzenDataGrid>
+<div class="buttons-footer" style="margin-top: 1rem; display: flex; justify-content: flex-end; gap: 1rem;">
+    <RadzenButton Text="Supprimer"
+    Icon="delete"
+    Style="min-width: 120px; right: 20px"
+    Click="DeleteSelected"
+    ButtonStyle="ButtonStyle.Danger"
+    Disabled="@(!CanEditOrDelete)" />
+    <RadzenButton Text="Ajouter"
+    Icon="add_circle"
+    Style="min-width: 120px; right: 20px"
+    Click="AddNew"
+    ButtonStyle="ButtonStyle.Primary" />
+</div>
+
+@code {
+    [Parameter] public string IdPropertyName { get; set; } = "Id";
+    private RadzenDataGrid<TEntity>? grid;
+    private List<TEntity>? items;
+    private TEntity? selectedItem;
+    private int pageSize = 10;
+    IList<TEntity>? selectedItems;
+
+    private bool HideFirstColumn => true;
+    private bool CanEditOrDelete => selectedItem != null;
+
+    private GenericDataService<TEntity> Service => ServiceProvider.GetRequiredService<GenericDataService<TEntity>>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        items = await Service.GetAllAsync();
+    }
+
+    private void OnRowSelect(object item)
+    {
+        selectedItem = (TEntity)item;
+    }
+
+    private async Task AddNew()
+    {
+        var newItem = Activator.CreateInstance<TEntity>();
+        var result = await DialogService.OpenAsync<GenericEntityForm<TEntity>>(
+            "Ajouter un enregistrement",
+            new Dictionary<string, object> { { "Entity", newItem }, { "IdPropertyName", IdPropertyName } }, new DialogOptions() { Width = "700px", Height = "80vh" }
+        );
+
+        if (result == true)
+        {
+            try
+            {
+                if (grid != null)
+                {
+                    await Service.AddAsync(newItem);
+                    items = await Service.GetAllAsync();
+                    await grid.Reload();
+                    await NotifySuccess("Ajout réussi !");
+                }
+            }
+            catch (Exception ex)
+            {
+                await NotifyError(ex.Message);
+            }
+        }
+    }
+
+    private async Task EditRow(DataGridRowMouseEventArgs<TEntity> args)
+    {
+        /* JQ : Declenchement de l'edition de la ligne selectionnée sur un double clic */
+        selectedItem = args.Data;
+        await EditSelected();
+    }
+
+    private async Task EditSelected()
+    {
+        /* JQ : Lancement du formulaire d'edition de la ligne selectionnée si il y en a bien une ! */
+        if (selectedItem == null)
+            return;
+
+        var clone = CloneEntity(selectedItem);
+
+        var result = await DialogService.OpenAsync<GenericEntityForm<TEntity>>(
+            "Modifier un enregistrement",
+            new Dictionary<string, object> { { "Entity", clone }, { "IdPropertyName", IdPropertyName } }, new DialogOptions() { Width = "800px", Height = "95vh" }
+        );
+
+        if (result == true)
+        {
+            try
+            {
+                if (grid != null)
+                {
+                    CopyProperties(clone, selectedItem);
+                    await Service.UpdateAsync(selectedItem);
+                    items = await Service.GetAllAsync();
+                    await grid.Reload();
+                    await NotifySuccess("Mise à jour réussie !");
+                }
+            }
+            catch (Exception ex)
+            {
+                await NotifyError(ex.Message);
+            }
+        }
+    }
+
+    private async Task DeleteSelected()
+    {
+        /* JQ : Suppression  de la ligne selectionnée si il y en a bien une ! et après confirmation */
+        if (selectedItem == null)
+            return;
+
+        bool? confirm = await DialogService.Confirm("Êtes-vous sûr de vouloir supprimer ?", "Supprimer");
+
+        if (confirm == true)
+        {
+            try
+            {
+                if (grid != null)
+                {
+                    await Service.DeleteAsync(selectedItem);
+                    items = await Service.GetAllAsync();
+                    selectedItem = default;
+                    await grid.Reload();
+                    await NotifySuccess("Suppression réussie !");
+                }
+            }
+            catch (Exception ex)
+            {
+                await NotifyError(ex.Message);
+            }
+        }
+    }
+
+    private void CopyProperties(TEntity source, TEntity destination)
+    {
+        foreach (var prop in typeof(TEntity).GetProperties())
+        {
+            if (prop.CanWrite)
+            {
+                var value = prop.GetValue(source);
+                prop.SetValue(destination, value);
+            }
+        }
+    }
+
+    private TEntity CloneEntity(TEntity entity)
+    {
+        var clone = Activator.CreateInstance<TEntity>();
+        CopyProperties(entity, clone);
+        return clone;
+    }
+
+    private async Task NotifySuccess(string message)
+    {
+        await Task.Run(() => NotificationService.Notify(new Radzen.NotificationMessage
+            {
+                Severity = Radzen.NotificationSeverity.Success,
+                Summary = "Succès",
+                Detail = message
+            })
+        );
+    }
+
+    private async Task NotifyError(string message)
+    {
+        await Task.Run(() => NotificationService.Notify(new Radzen.NotificationMessage
+            {
+                Severity = Radzen.NotificationSeverity.Error,
+                Summary = "Erreur",
+                Detail = message
+            })
+        );
+    }
+}

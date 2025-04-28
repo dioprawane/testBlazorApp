@@ -73,6 +73,10 @@ namespace GestionBudgétaire
                 new MySqlServerVersion(new Version(8, 0, 21))));
 
             builder.Services.AddScoped<TestService>(); // Service de Test
+            builder.Services.AddScoped(typeof(GenericDataService<>)); // JQ : Service généric d'accès aux entités
+
+            builder.Services.AddScoped<Radzen.DialogService>();
+            builder.Services.AddScoped<Radzen.NotificationService>();
 
             var app = builder.Build();
 

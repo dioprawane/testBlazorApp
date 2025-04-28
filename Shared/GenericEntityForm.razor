@@ -1,0 +1,256 @@
+﻿@using Microsoft.AspNetCore.Components.Forms
+@using Radzen
+@using Radzen.Blazor
+@using System.Reflection
+@using GestionBudgétaire.Data.Services
+
+@inject DialogService DialogService
+@inject NotificationService NotificationService
+@typeparam TEntity
+
+ @if (editContext != null)
+{
+    <div style="display: flex; flex-direction: column; height: 100%;">
+        <!-- JQ : Partie haute fixe : statut + boutons -->
+        <div style="flex: 0 0 auto; padding: 10px; background-color: #f8f9fa; border-bottom: 1px solid #ddd;">
+            <p>
+            <div class="mb-2">
+                Statut des Données : <RadzenBadge BadgeStyle="@GetStatusBadgeClass()" Text="@GetStatusBadgeText()" /> Flag modification [@_isModified]
+            </div>
+            </p>
+            <p>
+            <div class="d-flex justify-content-end mt-3">
+                <RadzenButton ButtonStyle="ButtonStyle.Primary"
+                              Text="Enregistrer"
+                              Click="HandleValidSubmit"
+                              Disabled="@(editContext == null ||!_isModified || !editContext.Validate())"
+                              Style="margin-right: 10px;" />
+
+                <RadzenButton ButtonStyle="ButtonStyle.Secondary"
+                              Text="Annuler"
+                              Click="ConfirmCancel" />
+            </div>
+            </p>
+        </div>
+        <!-- JQ : Partie basse scrollable : formulaire -->
+        <div style="flex: 1 1 auto; overflow-y: auto; padding: 15px; border-left: 1px solid #ddd; border-right: 1px solid #ddd; border-bottom: 1px solid #ddd;">
+            <EditForm Model="editContext" OnValidSubmit="HandleValidSubmit">
+                <DataAnnotationsValidator />
+                <ValidationSummary />
+                <RadzenFieldset Text="@editContext?.Model.GetType().Name">
+                    @foreach (var prop in EditableProperties)
+                    {
+                        <div class="mb-3">
+                            <label class="form-label">@prop.Name</label>
+
+                            @if (prop.PropertyType == typeof(string))
+                            {
+                                <RadzenTextBox Value="@(GetPropertyValue(prop) as string)"
+                                               ValueChanged="@(v => SetPropertyValue(prop, v))"
+                                               Name="@prop.Name"
+                                               Style="width:100%" />
+                            }
+                            else if (prop.PropertyType == typeof(int) ||
+                            prop.PropertyType == typeof(long) ||
+                            prop.PropertyType == typeof(decimal) ||
+                            prop.PropertyType == typeof(double))
+                            {
+                                <RadzenNumeric Value="@((decimal?) GetPropertyValue(prop) ?? 0)"
+                                               ValueChanged="@(EventCallback.Factory.Create<decimal>(this, v => SetPropertyValue(prop, v)))"
+                                               Name="@prop.Name"
+                                               Style="width:100%" />
+                            }
+                            else if (prop.PropertyType == typeof(bool))
+                            {
+                                <RadzenCheckBox TValue="bool"
+                                                Value="@((bool)(GetPropertyValue(prop) ?? false))"
+                                                ValueChanged="@(v => SetPropertyValue(prop, v))"
+                                                Name="@prop.Name" />
+                            }
+                            else if (prop.PropertyType == typeof(DateTime))
+                            {
+                                <RadzenDatePicker TValue="DateTime"
+                                                  Value="@((DateTime)(GetPropertyValue(prop) ?? DateTime.Now))"
+                                                  ValueChanged="@(v => SetPropertyValue(prop, v))"
+                                                  Name="@prop.Name"
+                                                  Style="width:100%" />
+                            }
+                            else
+                            {
+                                <RadzenTextBox Value="@(GetPropertyValue(prop)?.ToString())"
+                                               ValueChanged="@(v => SetPropertyValue(prop, v))"
+                                               Name="@prop.Name"
+                                               Style="width:100%" />
+                            }
+                        </div>
+                    }
+                </RadzenFieldset>
+            </EditForm>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public TEntity? Entity { get; set; }
+    private TEntity? originalEntity;  // JQ : Entité d'origine pour la comparaison
+    [Parameter] public EventCallback<bool> OnClose { get; set; }
+    [Parameter] public string IdPropertyName { get; set; } = "Id"; // JQ : On doit receoir le non de la colonne Primary key en paramètre par défaut c'est Id !
+    private EditContext? editContext;
+    private bool isModified => editContext?.IsModified() ?? false;
+    private bool isValid => editContext?.Validate() ?? false;
+
+    private bool _isModified = false;  // JQ : Champ privé qui suit les modifications
+
+    protected override void OnParametersSet()
+    {
+        if (Entity != null)
+        {   // JQ : Clone l'entité pour éviter toute modification accidentelle
+            // TODO : La méthode Clone pour Entity est implémentée dans la classe ./Data/Services/EntityExtensions.cs
+            // voir si une séialisation profonde sera nécessaire nécessitera un package JSON
+            originalEntity = Entity.Clone();
+        }
+    }
+
+    protected override void OnInitialized()
+    {
+        if (Entity != null)
+        {
+            editContext = new EditContext(Entity);
+            editContext.OnFieldChanged += (sender, args) => StateHasChanged();
+        }
+    }
+
+    private void DisposeEditContext()
+    {
+        if (editContext != null)
+        {
+            editContext.OnFieldChanged -= (sender, args) => StateHasChanged();
+        }
+    }
+
+    private IEnumerable<System.Reflection.PropertyInfo> EditableProperties =>
+        typeof(TEntity)
+        .GetProperties()
+        .Where(p => p.CanWrite && p.Name != IdPropertyName);
+
+    private T? BindProperty<T>(System.Reflection.PropertyInfo prop)
+    {
+        var value = prop.GetValue(Entity);
+        if (value == null) return default;
+        return (T)Convert.ChangeType(value, typeof(T));
+    }
+
+    private object? GetPropertyValue(PropertyInfo prop)
+    {
+        return prop.GetValue(Entity);
+    }
+
+    private void SetPropertyValue(PropertyInfo prop, object value)
+    {
+        if (value != null)
+        {
+            var targetType = Nullable.GetUnderlyingType(prop.PropertyType) ?? prop.PropertyType;
+
+            try
+            {
+                if (targetType.IsEnum)
+                {
+                    var enumValue = Enum.Parse(targetType, value.ToString() ?? string.Empty);
+                    prop.SetValue(Entity, enumValue);
+                }
+                else
+                {
+                    var convertedValue = Convert.ChangeType(value, targetType);
+                    prop.SetValue(Entity, convertedValue);
+                }
+
+                _isModified = !EntitiesAreEqual(originalEntity, Entity);
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Erreur de conversion pour la propriété {prop.Name}: {ex.Message}");
+            }
+        }
+    }
+    private async Task HandleValidSubmit()
+    {
+        Console.WriteLine("private async Task HandleValidSubmit()");
+        if (editContext != null && editContext.Validate())
+        {
+            await OnClose.InvokeAsync(true);
+            DialogService.Close(true);
+        }
+    }
+    private async Task ConfirmCancel()
+    {
+        if (!_isModified) // JQ : Vérification de la valeur de isModified
+        {
+            await OnClose.InvokeAsync(false);
+            DialogService.Close(false);
+            return;
+        }
+
+        var result = await DialogService.Confirm("Êtes-vous sûr ? Les modifications seront perdues.", "Confirmation");
+
+        if (result == true)
+        {
+            await OnClose.InvokeAsync(false);
+            DialogService.Close(false);
+        }
+    }
+
+    private Radzen.BadgeStyle GetStatusBadgeClass()
+    {
+        if (!_isModified)
+        {
+            return BadgeStyle.Base; // JQ : Gris
+        }
+        else if (editContext != null && (editContext.Validate() || _isModified))
+        {
+            return BadgeStyle.Success; // JQ : Vert
+        }
+        else
+        {
+            return BadgeStyle.Danger; // JQ : Rouge
+        }
+    }
+
+    private string GetStatusBadgeText()
+    {
+        if (!_isModified)
+        {
+            return "Aucune modification";
+        }
+        else if (editContext != null && (editContext.Validate() && _isModified))
+        {
+            return "Prêt à enregistrer";
+        }
+        else
+        {
+            return "Erreur dans le formulaire";
+        }
+    }
+
+    private bool EntitiesAreEqual(TEntity? original, TEntity? modified)
+    {
+        if (original == null || modified == null) return false;
+
+        var properties = typeof(TEntity).GetProperties();
+        foreach (var prop in properties)
+        {
+            if (prop.CanRead && prop.Name != IdPropertyName) // JQ : ne compare pas l'ID !!
+            {
+                var originalValue = prop.GetValue(original);
+                var modifiedValue = prop.GetValue(modified);
+
+                // Si les valeurs sont différentes
+                if (!object.Equals(originalValue, modifiedValue))
+                {
+                    return false;
+                }
+            }
+        }
+        return true;  // JQ : les entités sont égales !
+    }
+}
