@@ -1,0 +1,66 @@
+﻿@using Microsoft.AspNetCore.Components.Authorization
+@using System.DirectoryServices.AccountManagement
+@inject AuthenticationStateProvider AuthStateProvider
+@inject IHttpContextAccessor HttpContextAccessor
+
+
+@* Composant pour lister les informations du compte AD de l'utilisateur *@
+
+<h3>Profil utilisateur</h3>
+
+@if (adUser == null)
+{
+    <p>Chargement des informations depuis Active Directory...</p>
+}
+else
+{
+    <dl class="row">
+        <dt class="col-sm-3">Nom</dt>
+        <dd class="col-sm-9">@adUser.Surname</dd>
+
+        <dt class="col-sm-3">Prénom</dt>
+        <dd class="col-sm-9">@adUser.GivenName</dd>
+
+        <dt class="col-sm-3">Email</dt>
+        <dd class="col-sm-9">@adUser.EmailAddress</dd>
+
+        <dt class="col-sm-3">Identifiant AD</dt>
+        <dd class="col-sm-9">@login</dd>
+    </dl>
+}
+
+@code {
+    private UserPrincipal? adUser;
+    private string? login;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+        var identityName = user.Identity?.Name; // DOMAINE\login
+
+        if (!string.IsNullOrEmpty(identityName))
+        {
+            var parts = identityName.Split('\\');
+            if (parts.Length == 2)
+            {
+                var domain = parts[0];
+                login = parts[1];
+                adUser = GetAdUser(domain, login);
+            }
+        }
+    }
+
+    private UserPrincipal? GetAdUser(string domain, string login)
+    {
+        try
+        {
+            using var context = new PrincipalContext(ContextType.Domain, domain);
+            return UserPrincipal.FindByIdentity(context, login);
+        }
+        catch
+        {
+            return null;
+        }
+    }
+}

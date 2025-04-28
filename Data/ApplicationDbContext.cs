@@ -3,16 +3,12 @@ using Microsoft.EntityFrameworkCore;
 
 namespace GestionBudgétaire.Data
 {
-    public class ApplicationDbContext : DbContext
+    public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : DbContext(options)
     {
-        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
-            : base(options)
-        {
-        }
-
-        // Propriete DbSet<Dialogue> representant la table Dialogue dans la base de donn�es
-        // Cette propri�t� permet de faire des requ�tes et des op�rations CRUD sur la table Dialogue
+        // Propriété DbSet<Dialogue> representant la table Dialogue dans la base de données
+        // Cette propriété permet de faire des requêtes et des opérations CRUD sur la table Dialogue
         public DbSet<Dialogue>? Dialogue { get; set; }
-
+        // DbSet d'accès à la table des rôles applicatifs
+        public DbSet<AppUserRole> AppUserRoles { get; set; }
     }
 }

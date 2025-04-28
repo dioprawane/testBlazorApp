@@ -1,0 +1,72 @@
+﻿@using Microsoft.AspNetCore.Components.Authorization
+@using System.DirectoryServices.AccountManagement
+@inject AuthenticationStateProvider AuthStateProvider
+
+@* Composant pour lister les groupes AD de l'utilisateur *@
+
+<h3>Groupes Active Directory</h3>
+
+@if (groups == null)
+{
+    <p>Chargement en cours...</p>
+}
+else if (groups.Count == 0)
+{
+    <p>Aucun groupe trouvé pour l'utilisateur @login.</p>
+}
+else
+{
+    <ul class="list-group">
+        @foreach (var group in groups)
+        {
+            <li class="list-group-item">@group</li>
+        }
+    </ul>
+}
+
+@code {
+    private List<string>? groups;
+    private string? login;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+        var identityName = user.Identity?.Name; // DOMAINE\login
+
+        if (!string.IsNullOrEmpty(identityName))
+        {
+            var parts = identityName.Split('\\');
+            if (parts.Length == 2)
+            {
+                var domain = parts[0];
+                login = parts[1];
+                groups = GetUserGroups(domain, login);
+            }
+        }
+    }
+
+    private List<string> GetUserGroups(string domain, string login)
+    {
+        var result = new List<string>();
+        try
+        {
+            using var context = new PrincipalContext(ContextType.Domain, domain);
+            var user = UserPrincipal.FindByIdentity(context, login);
+            if (user != null)
+            {
+                var groupPrincipals = user.GetAuthorizationGroups();
+                foreach (var group in groupPrincipals)
+                {
+                    if (!string.IsNullOrWhiteSpace(group.Name))
+                        result.Add(group.Name);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            result.Add($"Erreur : {ex.Message}");
+        }
+        return result;
+    }
+}

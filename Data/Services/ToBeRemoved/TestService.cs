@@ -2,7 +2,7 @@
 using GestionBudgétaire.Data.Entities.Database;
 using Microsoft.EntityFrameworkCore;
 
-namespace GestionBudgétaire.Services
+namespace GestionBudgétaire.Data.Services.ToBeRemoved
 {
     public class TestService
     {
