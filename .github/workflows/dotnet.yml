@@ -45,11 +45,8 @@ jobs:
     - name: Compilation
       run: dotnet build --configuration Release --no-restore  # Compile l’application en mode Release sans refaire restore
 
-    - name: Tests
-      run: dotnet test --no-restore --verbosity normal    # Exécute les tests unitaires avec une sortie standard
-
     - name: Tests with dotnet CLI and export results
-      run: dotnet test --no-restore --logger "trx;LogFileName=test_results.trx" --results-directory "TestResults"
+      run: dotnet test --no-restore --configuration Release --verbosity normal --logger "trx;LogFileName=test_results.trx" --results-directory "TestResults"    
 
     - name: Upload test results
       uses: actions/upload-artifact@v4
