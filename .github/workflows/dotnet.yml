@@ -5,10 +5,10 @@ name: .NET Actions
 on:
   push: # À chaque push
     branches:
-      - main          # Sur la branche main
-  pull_request: #À chaque pull request
+      - master        # Sur la branche master
+  pull_request: # À chaque pull request
     branches:
-      - main          # Vers main
+      - master        # Vers master
       - features      # Vers features
 
 # Définition des tâches à exécuter
