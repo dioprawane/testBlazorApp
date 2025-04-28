@@ -1,8 +1,11 @@
 ﻿@page "/test-db"
-@using GestionBudgétaire.Data.Entities.Database
 @using GestionBudgétaire.Data
-@using GestionBudgétaire.Services
+@using GestionBudgétaire.Data.Entities.Database
+@using GestionBudgétaire.Data.Services.ToBeRemoved
+
 @inject TestService TestService
+
+@* Page de test permet de contrôler l'accès à la base de données *@'
 
 <h3>Données de la table Dialogue</h3>
 
@@ -44,6 +47,7 @@ else
 
     protected override async Task OnInitializedAsync()
     {
+        Console.WriteLine($"OnInitializedAsync test.razor - /test-db");
         try
         {
             dialogues = await TestService.GetDialoguesAsync();
