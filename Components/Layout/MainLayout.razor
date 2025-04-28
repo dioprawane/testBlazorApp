@@ -1,8 +1,15 @@
 ﻿@inherits LayoutComponentBase
 
-@Body
+@* Body avec mise en forme HTML *@
+<main class="container">
+    @Body
+</main>
+
 @* la ligne ci-dessous permet l'utilisation des Dialog, Notification, ContextMenu et Tooltip de Radzen *@
 @* Il faut fixer la valeur du rendermode à la même valeur que dans le fichier App.razor *@
+
+@* la ligne ci-dessous permet l'utilisation la barre de menu *@
+<NavMenu />
 
 <RadzenComponents @rendermode="InteractiveServer" />
 <RadzenDialog />
@@ -14,3 +21,25 @@
     <a href="" class="reload">Reload</a>
     <a class="dismiss">🗙</a>
 </div>
+
+<style>
+    .container {
+        padding-top: 10px;
+        margin: 15vh auto 1rem auto;
+    }
+
+    #blazor-error-ui {
+        background: lightyellow;
+        color: red;
+        position: fixed;
+        bottom: 0;
+        width: 100%;
+        text-align: center;
+        padding: 0.5rem;
+        display: none;
+    }
+
+        #blazor-error-ui a {
+            margin-left: 1rem;
+        }
+</style>

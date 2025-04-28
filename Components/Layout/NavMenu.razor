@@ -16,21 +16,19 @@
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse @NavBarCssClass" id="navbarCollapse">
-            <RadzenMenu Orientation="Horizontal" Style="width: 100%;" class="custom-radzen-menu" >
+            <RadzenMenu Orientation="Horizontal" Style="width: 100%;" class="custom-radzen-menu">
                 <RadzenMenuItem Style="margin-left: 0px;" Text="Accueil" Path="/" Icon="home" />
 
                 <!-- Groupe Edit -->
                 <RadzenMenuItem Style="margin-left: 5px;" Text="Consulter" Icon="edit">
-                    <RadzenMenuItem Text="Tout" Path="select" Icon="check_box" class="custom-submenu-item" />
-                    <RadzenMenuItem Text="Selection" Path="see" Icon="visibility" class="custom-submenu-item" />
-                    <RadzenMenuItem Text="Edition" Path="edition1" Icon="visibility" class="custom-submenu-item" />
-                    <RadzenMenuItem Text="MasterDetail" Path="selectmaster" Icon="visibility" class="custom-submenu-item" />
+                    <RadzenMenuItem Text="Vue" Path="select" Icon="check_box" class="custom-submenu-item" />
                 </RadzenMenuItem>
 
                 <!-- Groupe Add -->
-                <RadzenMenuItem Style="margin-left: 5px;" Text="Ajouter" Icon="add_box">
-                    <RadzenMenuItem Text="Dialogue" Path="add" Icon="add_box" class="custom-submenu-item" />
-                    <RadzenMenuItem Text="Ligne budgétaire" Path="addlignebudeg" Icon="add_box" class="custom-submenu-item" />
+                <RadzenMenuItem Style="margin-left: 5px;" Text="Tests" Icon="add_box">
+                    <RadzenMenuItem Text="Sensible" Path="sensible" Icon="add_box" class="custom-submenu-item" />
+                    <RadzenMenuItem Text="Test-Database" Path="test-db" Icon="add_box" class="custom-submenu-item" />
+                    <RadzenMenuItem Text="Menu" Path="menu" Icon="add_box" class="custom-submenu-item" />
                 </RadzenMenuItem>
 
             </RadzenMenu>

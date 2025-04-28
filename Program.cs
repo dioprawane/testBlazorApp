@@ -55,7 +55,7 @@ namespace GestionBudgétaire
                 .AddInteractiveServerComponents();
             //builder.Services.AddRadzenComponents();
 
-            // Gestion de la base de donn�es
+            // RD : Gestion de la base de donnees
             string? connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
             string dbPassword = Environment.GetEnvironmentVariable("PASSWORDMYSQL") ?? "default_password";
             Console.WriteLine("Mot de passe DB récupéré: " + dbPassword);
@@ -72,7 +72,8 @@ namespace GestionBudgétaire
                 options.UseMySql(connectionString + ";AllowZeroDateTime=True;ConvertZeroDateTime=True", // Les 2 derniers param pour accepter des dates "0000-00-00"
                 new MySqlServerVersion(new Version(8, 0, 21))));
 
-            builder.Services.AddScoped<TestService>(); // Service de Test
+            // RD : Service de Test
+            builder.Services.AddScoped<TestService>();
 
             var app = builder.Build();
 
@@ -94,6 +95,8 @@ namespace GestionBudgétaire
             app.MapRazorComponents<App>()
                 .AddInteractiveServerRenderMode();
 
+            // RD : Exécution/Lancement de l'application web
+            //app.Run();
             try
             {
                 // Exécution/Lancement de l'application web

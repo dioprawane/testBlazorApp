@@ -1,0 +1,45 @@
+name: .NET
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    branches:
+      - main
+      - develop
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: '8.0.302'
+
+    # - name: Set environment variables
+    #   run: echo "PASSWORDMYSQL=${{ secrets.PASSWORDMYSQL }}" >> $GITHUB_ENV
+
+    # - name: Install MySQL Client
+    #   run: sudo apt-get install -y mysql-client
+
+    #- name: Test MySQL Connection
+      #env:
+        #PASSWORDMYSQL: ${{ secrets.PASSWORDMYSQL }}
+      #run: |
+        #mysql --host=pro69valo.urdom.ad.recouv --user=perfeco --password=$PASSWORDMYSQL dialogue_gestion -e "SHOW DATABASES;"
+
+    - name: Restore dependencies
+      run: dotnet restore
+
+    - name: Build
+      run: dotnet build --configuration Release --no-restore
+
+    - name: Test
+      run: dotnet test --no-restore --verbosity normal
