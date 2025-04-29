@@ -1,0 +1,56 @@
+# Nom du workflow visible sur GitHub
+name: .NET Actions
+
+# Quand déclencher ce workflow
+on:
+  push: # À chaque push
+    branches:
+      - master        # Sur la branche master
+  pull_request: # À chaque pull request
+    branches:
+      - master        # Vers master
+      - features      # Vers features
+
+# Définition des tâches à exécuter
+jobs:
+  build:
+    runs-on: ubuntu-latest   # Utilise la dernière version d'une VM Ubuntu hébergée par GitHub
+
+    # Liste des actions à effectuer
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4  # Clone le code source du dépôt
+
+    - name: Installation .NET du sdk
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.302'  # Installe la version spécifique .NET 8.0.302 du SDK 
+
+    # Ces étapes sont utilisées pour se connecter à MySQL
+    # - name: Set environment variables
+    #   run: echo "PASSWORDMYSQL=${{ secrets.PASSWORDMYSQL }}" >> $GITHUB_ENV
+
+    # - name: Install MySQL Client
+    #   run: sudo apt-get install -y mysql-client
+
+    # - name: Test MySQL Connection
+    #   env:
+    #     PASSWORDMYSQL: ${{ secrets.PASSWORDMYSQL }}
+    #   run: |
+    #     mysql --host=pro69valo.urdom.ad.recouv --user=perfeco --password=$PASSWORDMYSQL dialogue_gestion -e "SHOW DATABASES;"
+
+    - name: Intallation/Restauration des dépendances
+      run: dotnet restore    # Restaure/installe les dépendances NuGet
+
+    - name: Compilation
+      run: dotnet build --configuration Release --no-restore  # Compile l’application en mode Release sans refaire restore
+
+    - name: Tests with dotnet CLI and export results
+      run: dotnet test --no-restore --configuration Release --verbosity normal --logger "trx;LogFileName=test_results.trx" --results-directory "TestResults"    
+
+    - name: Upload test results
+      uses: actions/upload-artifact@v4
+      with:
+        name: TestResults
+        path: TestResults
+

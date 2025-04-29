@@ -32,7 +32,6 @@ namespace GestionBudgétaire.Data.Services
             {
                 identity.AddClaim(new Claim(ClaimTypes.Role, role, ClaimValueTypes.String, "Custom"));
             }
-
             return principal;
         }
     }

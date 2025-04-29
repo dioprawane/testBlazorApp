@@ -191,6 +191,9 @@ Cette partie décrit les règles d’usages pour la gestion du repos. [Référen
 
 ---
 
+## Documentations
+[Github Actions](https://docs.github.com/en/actions/use-cases-and-examples/building-and-testing/building-and-testing-net)
+
 ## Contacts
 
 Pour toute question ou suggestion, n'hésitez pas à nous contacter :

@@ -1,0 +1,36 @@
+﻿@using Radzen
+@using Radzen.Blazor
+
+<h3>Console log</h3>
+
+<RadzenCard Style="padding: 1rem; background-color: #f9f9f9; margin-bottom: 5px">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px">
+        <span style="font-weight: bold;">Console log</span>
+        <RadzenButton Text="Clear console" Click="@(() => Clear())" ButtonStyle="ButtonStyle.Light" Style="margin-bottom: 1rem;" />
+    </div>
+
+    <div>
+        @foreach (var message in messages)
+        {
+            <RadzenPanel Style="background-color: #d9f0ff; padding: 0.5rem; border-radius: 10px; margin-bottom: 0.5rem;">
+                @message
+            </RadzenPanel>
+        }
+    </div>
+</RadzenCard>
+
+@code {
+    private List<string> messages = new List<string>();
+
+    public void Log(string message)
+    {
+        messages.Insert(0, $"{DateTime.Now:HH:mm:ss.ff} {message}");
+        StateHasChanged();
+    }
+
+    public void Clear()
+    {
+        messages.Clear();
+        StateHasChanged();
+    }
+}
