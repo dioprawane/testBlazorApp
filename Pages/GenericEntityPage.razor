@@ -9,17 +9,16 @@
 @inject IServiceProvider ServiceProvider
 @inject Radzen.DialogService DialogService
 @inject Radzen.NotificationService NotificationService
+@inject NavigationManager Navigation
 
-<!-- JQ : Cette page permet d'afficher le contenu d'une table sous la forme 
+<!-- JQ : Cette page permet d'afficher le contenu d'une table sous la forme
      d'un RadzenDatagrid en utilisant l'introspection sur le type objet des colonnes de la table.
      Le RadzenDatagrid dispose de boutons et de la gestion du double clic sur une ligne pour implémenter
      les fonctions CRUD de manière générique.
 -->
-
 <!-- JQ : TODO : Il faut ajouter les commentaires au code et sans doute voir si il n'y a
      pas quelques bouts de code à supprimer suite au développement
 -->
-
 <!-- JQ : TODO : la partie gestion des couleurs ne fonctionne pas à revoir -->
 <style>
     .rz-selectable .rz-datatable-even.rz-state-highlight .rz-cell-data,
@@ -40,6 +39,7 @@
 <PageTitle>Gestion générique</PageTitle>
 
 <RadzenDataGrid TItem="TEntity" Data="@items" @ref="grid"
+                LoadData="@LoadData"
                 ColumnWidth="200px"
                 AllowPaging="true" PageSize="@pageSize"
                 RowDoubleClick="EditRow"
@@ -52,8 +52,34 @@
         {
             if (HideFirstColumn && prop.Name == @IdPropertyName)
                 continue;
+            if (prop.Name == "RowVersion")
+            {
+                <RadzenDataGridColumn TItem="TEntity" Property="@prop.Name" Title="@prop.Name">
+                    <Template Context="item">
+                        @{
+                            //long dbtime = BitConverter.ToInt16(prop.GetValue(item) as Byte[] ?? [], 0);
+                            Byte[] baDbTime = prop.GetValue(item) as Byte[] ?? [];
 
-            <RadzenDataGridColumn TItem="TEntity" Property="@prop.Name" Title="@prop.Name" />
+                            //DateTime.FromBinary(dbtime);
+
+                            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+                            sb.Append("0x");
+                            for (int i = 0; i < baDbTime.Length; i++)
+                            {
+                                sb.Append(baDbTime[i].ToString("X2"));
+                            }
+                            @sb.ToString()
+                            ;
+                        }
+                    </Template>
+                </RadzenDataGridColumn>
+            }
+            else
+            {
+                <RadzenDataGridColumn TItem="TEntity" Property="@prop.Name" Title="@prop.Name" />
+            }
+
         }
     </Columns>
 </RadzenDataGrid>
@@ -83,6 +109,17 @@
     private bool CanEditOrDelete => selectedItem != null;
 
     private GenericDataService<TEntity> Service => ServiceProvider.GetRequiredService<GenericDataService<TEntity>>();
+
+    void LoadData(LoadDataArgs args)
+    {
+        if (grid != null)
+        {
+            StateHasChanged();
+            Task.Run(async () => await NotifyError("Load Data")); // JQ : pour debug à supprimer
+            Task.Run(async () => items = await Service.GetAllAsync());
+            Task.Run(async () => await grid.Reload());
+        }
+    }
 
     protected override async Task OnInitializedAsync()
     {
@@ -128,12 +165,24 @@
         await EditSelected();
     }
 
+    /*
+    void Close(dynamic result)
+    {
+        if (grid != null)
+        {
+            Task.Run(async () => items = await Service.GetAllAsync());
+            grid.Reload();
+            }
+        }
+    */
+
     private async Task EditSelected()
     {
         /* JQ : Lancement du formulaire d'edition de la ligne selectionnée si il y en a bien une ! */
         if (selectedItem == null)
             return;
 
+        var selectedItemBeforUpdate = CloneEntity(selectedItem);
         var clone = CloneEntity(selectedItem);
 
         var result = await DialogService.OpenAsync<GenericEntityForm<TEntity>>(
@@ -147,16 +196,60 @@
             {
                 if (grid != null)
                 {
-                    CopyProperties(clone, selectedItem);
-                    await Service.UpdateAsync(selectedItem);
-                    items = await Service.GetAllAsync();
-                    await grid.Reload();
-                    await NotifySuccess("Mise à jour réussie !");
+                    var updateDone = false;
+                    try
+                    {
+                        CopyProperties(clone, selectedItem);
+                        await Service.UpdateAsync(selectedItem);
+                        updateDone = true;
+                        //items = await Service.GetAllAsync();
+                        //await grid.Reload();
+                        //await NotifySuccess("Mise à jour réussie !");
+                    }
+                    catch (ConcurrencyException ex)
+                    {
+                        var attente = await DialogService.Alert("Conflit de modification, vos données n'ont pas été prises en compte", "Erreur mise à jour");
+                        //items = await Service.GetAllAsync();
+                        StateHasChanged();
+                        //await grid.Reload();
+                        /*
+                        // JQ : Affiche un message dans la page
+                        NotificationService.Notify(new NotificationMessage
+                        {
+                            Severity = NotificationSeverity.Error,
+                            Summary = "Conflit de modification, vos données n'ont pas été prises en compte",
+                            Detail = ex.Message,
+                            Duration = 4000
+                            });
+                        */
+                    }
+                    finally
+                    {
+
+                        if (updateDone)
+                        {
+                            await NotifySuccess("EditSelected - Mise à jour réussie !");
+                        }
+                        else
+                        {
+                            CopyProperties(selectedItemBeforUpdate, selectedItem);
+                            await NotifyError("EditSelected - Mise à jour non effectuée !");
+
+                        }
+                        
+                        StateHasChanged();
+                        items = await Service.GetAllAsync();
+                        await grid.Reload();
+                        await grid.RefreshDataAsync();
+                        
+                        //Navigation.Refresh(true);
+                    }
                 }
             }
             catch (Exception ex)
             {
-                await NotifyError(ex.Message);
+                var attente = await DialogService.Alert(ex.Message, "Erreur mise à jour");
+                //await NotifyError(ex.Message);
             }
         }
     }

@@ -1,4 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using GestionBudgétaire.Data.Entities;
+using Microsoft.EntityFrameworkCore;
+using System.Data;
 
 // JQ : Dataservice en lien avec l'edition générique des table, permet d'implémenter les fonction CRUD
 
@@ -29,19 +31,30 @@ namespace GestionBudgétaire.Data.Services
         public async Task UpdateAsync(TEntity entity)
         {
             _context.Entry(entity).State = EntityState.Modified;
-            await _context.SaveChangesAsync();
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException ex) when (entity is IHasRowVersion)
+            {
+                throw new ConcurrencyException("La donnée a été modifiée par un autre utilisateur.", ex);
+            }
         }
 
         public async Task DeleteAsync(TEntity entity)
         {
             _dbSet.Remove(entity);
             await _context.SaveChangesAsync();
+            
         }
 
         public async Task<TEntity?> GetByIdAsync(object id)
         {
             return await _dbSet.FindAsync(id);
         }
+    }
+    public class ConcurrencyException(string message, Exception innerException) : Exception(message, innerException)
+    {
     }
 }
 

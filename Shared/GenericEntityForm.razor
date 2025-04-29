@@ -14,30 +14,31 @@
         <!-- JQ : Partie haute fixe : statut + boutons -->
         <div style="flex: 0 0 auto; padding: 10px; background-color: #f8f9fa; border-bottom: 1px solid #ddd;">
             <p>
-            <div class="mb-2">
-                Statut des Données : <RadzenBadge BadgeStyle="@GetStatusBadgeClass()" Text="@GetStatusBadgeText()" /> Flag modification [@_isModified]
-            </div>
+                <div class="mb-2">
+                    Statut des Données : <RadzenBadge BadgeStyle="@GetStatusBadgeClass()" Text="@GetStatusBadgeText()" /> Flag modification [@_isModified]
+                </div>
             </p>
             <p>
-            <div class="d-flex justify-content-end mt-3">
-                <RadzenButton ButtonStyle="ButtonStyle.Primary"
-                              Text="Enregistrer"
-                              Click="HandleValidSubmit"
-                              Disabled="@(editContext == null ||!_isModified || !editContext.Validate())"
-                              Style="margin-right: 10px;" />
+                <div class="d-flex justify-content-end mt-3">
+                    <RadzenButton ButtonStyle="ButtonStyle.Primary"
+                                  Text="Enregistrer"
+                                  Click="HandleValidSubmit"
+                                  Disabled="@(editContext == null ||!_isModified || !editContext.Validate())"
+                                  Style="margin-right: 10px;" />
 
-                <RadzenButton ButtonStyle="ButtonStyle.Secondary"
-                              Text="Annuler"
-                              Click="ConfirmCancel" />
-            </div>
+                    <RadzenButton ButtonStyle="ButtonStyle.Secondary"
+                                  Text="Annuler"
+                                  Click="ConfirmCancel" />
+                </div>
             </p>
         </div>
         <!-- JQ : Partie basse scrollable : formulaire -->
         <div style="flex: 1 1 auto; overflow-y: auto; padding: 15px; border-left: 1px solid #ddd; border-right: 1px solid #ddd; border-bottom: 1px solid #ddd;">
-            <EditForm Model="editContext" OnValidSubmit="HandleValidSubmit">
+            <EditForm Model="Entity" OnValidSubmit="HandleValidSubmit">
                 <DataAnnotationsValidator />
                 <ValidationSummary />
-                <RadzenFieldset Text="@editContext?.Model.GetType().Name">
+                <RadzenFieldset Text="@Entity?.GetType().Name">
+
                     @foreach (var prop in EditableProperties)
                     {
                         <div class="mb-3">
@@ -96,9 +97,8 @@
     [Parameter] public EventCallback<bool> OnClose { get; set; }
     [Parameter] public string IdPropertyName { get; set; } = "Id"; // JQ : On doit receoir le non de la colonne Primary key en paramètre par défaut c'est Id !
     private EditContext? editContext;
-    private bool isModified => editContext?.IsModified() ?? false;
-    private bool isValid => editContext?.Validate() ?? false;
-
+    //private bool isModified => editContext?.IsModified() ?? false;
+    //private bool isValid => editContext?.Validate() ?? false;
     private bool _isModified = false;  // JQ : Champ privé qui suit les modifications
 
     protected override void OnParametersSet()
@@ -118,6 +118,7 @@
             editContext = new EditContext(Entity);
             editContext.OnFieldChanged += (sender, args) => StateHasChanged();
         }
+        
     }
 
     private void DisposeEditContext()
@@ -127,6 +128,8 @@
             editContext.OnFieldChanged -= (sender, args) => StateHasChanged();
         }
     }
+
+   
 
     private IEnumerable<System.Reflection.PropertyInfo> EditableProperties =>
         typeof(TEntity)
