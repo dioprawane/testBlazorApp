@@ -1,0 +1,22 @@
+﻿INSERT INTO DemoEntityValues (Name, IsActive, CreatedDate, Amount, Score, ExternalId, Description)
+VALUES
+('Produit A', TRUE, '2024-01-01 10:00:00', 100.50, 87.5, UUID(), 'Premier produit'),
+('Produit B', FALSE, '2024-01-02 11:00:00', 250.00, 92.1, UUID(), 'Deuxième produit'),
+('Produit C', TRUE, '2024-01-03 12:00:00', 75.99, NULL, UUID(), 'Troisième produit'),
+('Produit D', TRUE, '2024-01-04 09:30:00', 120.00, 78.0, UUID(), 'Quatrième produit'),
+('Produit E', FALSE, '2024-01-05 15:45:00', 450.75, 88.3, UUID(), 'Cinquième produit'),
+('Produit F', TRUE, '2024-01-06 08:20:00', 300.20, NULL, UUID(), 'Sixième produit'),
+('Produit G', TRUE, '2024-01-07 14:10:00', 110.10, 80.2, UUID(), 'Septième produit'),
+('Produit H', FALSE, '2024-01-08 16:00:00', 90.90, 70.0, UUID(), 'Huitième produit'),
+('Produit I', TRUE, '2024-01-09 18:30:00', 60.60, 95.0, UUID(), 'Neuvième produit'),
+('Produit J', TRUE, '2024-01-10 07:50:00', 500.00, 99.9, UUID(), 'Dixième produit'),
+('Produit K', TRUE, '2024-01-11 13:20:00', 200.00, 85.5, UUID(), 'Onzième produit'),
+('Produit L', FALSE, '2024-01-12 10:10:00', 340.40, 88.8, UUID(), 'Douzième produit'),
+('Produit M', TRUE, '2024-01-13 09:00:00', 410.10, NULL, UUID(), 'Treizième produit'),
+('Produit N', TRUE, '2024-01-14 11:30:00', 290.90, 75.5, UUID(), 'Quatorzième produit'),
+('Produit O', FALSE, '2024-01-15 12:45:00', 50.50, 68.4, UUID(), 'Quinzième produit'),
+('Produit P', TRUE, '2024-01-16 14:00:00', 600.00, 91.2, UUID(), 'Seizième produit'),
+('Produit Q', TRUE, '2024-01-17 16:20:00', 330.30, 89.9, UUID(), 'Dix-septième produit'),
+('Produit R', FALSE, '2024-01-18 08:40:00', 120.10, NULL, UUID(), 'Dix-huitième produit'),
+('Produit S', TRUE, '2024-01-19 10:15:00', 280.80, 77.7, UUID(), 'Dix-neuvième produit'),
+('Produit T', TRUE, '2024-01-20 17:30:00', 70.70, 82.3, UUID(), 'Vingtième produit');

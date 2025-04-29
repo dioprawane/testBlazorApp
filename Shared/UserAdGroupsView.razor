@@ -2,7 +2,7 @@
 @using System.DirectoryServices.AccountManagement
 @inject AuthenticationStateProvider AuthStateProvider
 
-@* Composant pour lister les groupes AD de l'utilisateur *@
+@* JQ : Composant pour lister les groupes AD de l'utilisateur *@
 
 <h3>Groupes Active Directory</h3>
 
@@ -32,7 +32,7 @@ else
     {
         var authState = await AuthStateProvider.GetAuthenticationStateAsync();
         var user = authState.User;
-        var identityName = user.Identity?.Name; // DOMAINE\login
+        var identityName = user.Identity?.Name; // JQ : on doit récupérer une chaine sous la forme DOMAINE\login
 
         if (!string.IsNullOrEmpty(identityName))
         {

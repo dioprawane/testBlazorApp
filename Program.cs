@@ -72,6 +72,12 @@ namespace GestionBudgétaire
                 options.UseMySql(connectionString + ";AllowZeroDateTime=True;ConvertZeroDateTime=True", // Les 2 derniers param pour accepter des dates "0000-00-00"
                 new MySqlServerVersion(new Version(8, 0, 21))));
 
+
+            builder.Services.AddScoped(typeof(GenericDataService<>)); // JQ : Service généric d'accès aux entités
+
+            builder.Services.AddScoped<Radzen.DialogService>();
+            builder.Services.AddScoped<Radzen.NotificationService>();
+
             // RD : Service de Test
             builder.Services.AddScoped<TestService>();
 
