@@ -5,6 +5,8 @@ VisualStudioVersion = 17.13.35919.96
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GestionBudgétaire", "GestionBudgétaire.csproj", "{D0881DA1-C64B-436F-AA17-08637CB12DDE}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GestionBudgetaireTest", "..\GestionBudgetTest\GestionBudgetaireTest.csproj", "{8995D031-CC3C-4F35-BE9C-8218C5747EA8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{D0881DA1-C64B-436F-AA17-08637CB12DDE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D0881DA1-C64B-436F-AA17-08637CB12DDE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D0881DA1-C64B-436F-AA17-08637CB12DDE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8995D031-CC3C-4F35-BE9C-8218C5747EA8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8995D031-CC3C-4F35-BE9C-8218C5747EA8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8995D031-CC3C-4F35-BE9C-8218C5747EA8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8995D031-CC3C-4F35-BE9C-8218C5747EA8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

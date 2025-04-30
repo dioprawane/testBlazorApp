@@ -194,6 +194,10 @@ Cette partie décrit les règles d’usages pour la gestion du repos. [Référen
 ## Documentations
 [Github Actions](https://docs.github.com/en/actions/use-cases-and-examples/building-and-testing/building-and-testing-net)
 
+### Pour correction bug MAJ des données, conflit de modification
+- [Source 1](https://learn.microsoft.com/fr-fr/ef/core/saving/concurrency?tabs=data-annotations)
+- [Source 2](https://learn.microsoft.com/fr-fr/aspnet/core/blazor/components/lifecycle?view=aspnetcore-8.0#state-management-and-rendering)
+- [Source 3](https://learn.microsoft.com/fr-fr/dotnet/api/microsoft.entityframeworkcore.changetracking.changetracker.clear?view=efcore-8.0)
 ## Contacts
 
 Pour toute question ou suggestion, n'hésitez pas à nous contacter :

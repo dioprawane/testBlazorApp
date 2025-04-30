@@ -4,6 +4,7 @@
 @using System.Security.Claims
 @inject AuthenticationStateProvider AuthStateProvider
 @attribute [Authorize]
+@inject ILogger<Home> logger
 
 <PageTitle>Home</PageTitle>
 
@@ -32,9 +33,11 @@ else
 @code {
     private ClaimsPrincipal? user;
 
+
     protected override async Task OnInitializedAsync()
     {
         var authState = await AuthStateProvider.GetAuthenticationStateAsync();
         user = authState.User;
+        logger.LogInformation("Test de log dans Home");
     }
 }

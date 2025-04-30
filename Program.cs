@@ -16,6 +16,10 @@ namespace GestionBudgétaire
         {
             var builder = WebApplication.CreateBuilder(args);
 
+            // RD : Crée le dossier logs si nécessaire
+            var logDirectory = Path.Combine(builder.Environment.ContentRootPath, "logs");
+            Directory.CreateDirectory(logDirectory);
+
             // Configuration de Serilog
             Log.Logger = new LoggerConfiguration()
                 // Définir le niveau de log minimum pour tout le système à Debug
@@ -29,9 +33,16 @@ namespace GestionBudgétaire
                 // Ajouter une destination de log (sink) pour un fichier
                 // Les logs seront écrits dans des fichiers sous le dossier "logs" avec un nom de fichier "log-[date].txt"
                 // Les fichiers de log seront segmentés quotidiennement (rollingInterval: RollingInterval.Day)
-                .WriteTo.File("logs/log-.txt", rollingInterval: RollingInterval.Day)
+                // shared: true, permet à plusieurs processus ou threads de partager l'accès au fichier de log sans le verrouiller exclusivement.
+                .WriteTo.File(
+                    Path.Combine(logDirectory, "log-.txt"),
+                    rollingInterval: RollingInterval.Day, 
+                    shared: true)
                 // Créer l'instance de logger configurée
                 .CreateLogger();
+
+            // branche ASP-NET Core sur Serilog (extension du package Serilog.AspNetCore) pour bien avoir les fichiers de logs
+            builder.Host.UseSerilog();
 
             // JQ : Ajout de l'authentification Windows (Negotiate) A supprimer dans le cas ou on utilise l'authentification Windows sur IIS
             //builder.Services.AddAuthentication(NegotiateDefaults.AuthenticationScheme)

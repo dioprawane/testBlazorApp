@@ -30,6 +30,11 @@ namespace GestionBudgétaire.Data.Services
 
         public async Task UpdateAsync(TEntity entity)
         {
+            /* RD : Détache toutes les entités suivies : sans cette ligne, erreur d'instance avec la même clé pour la méthode : RefreshDataAsync()
+            EF Core détache toutes les entités suivies par ce DbContext; il ne reste alors qu’une seule instance pour la clé primaire.
+            */
+            _context.ChangeTracker.Clear();
+
             _context.Entry(entity).State = EntityState.Modified;
             try
             {

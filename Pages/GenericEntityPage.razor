@@ -10,6 +10,7 @@
 @inject Radzen.DialogService DialogService
 @inject Radzen.NotificationService NotificationService
 @inject NavigationManager Navigation
+@inject ILogger<GenericEntityPage<TEntity>> logger
 
 <!-- JQ : Cette page permet d'afficher le contenu d'une table sous la forme
      d'un RadzenDatagrid en utilisant l'introspection sur le type objet des colonnes de la table.
@@ -39,7 +40,6 @@
 <PageTitle>Gestion générique</PageTitle>
 
 <RadzenDataGrid TItem="TEntity" Data="@items" @ref="grid"
-                LoadData="@LoadData"
                 ColumnWidth="200px"
                 AllowPaging="true" PageSize="@pageSize"
                 RowDoubleClick="EditRow"
@@ -110,7 +110,8 @@
 
     private GenericDataService<TEntity> Service => ServiceProvider.GetRequiredService<GenericDataService<TEntity>>();
 
-    void LoadData(LoadDataArgs args)
+    // RD : Plus besoin de LoadData, le code d'avant suffit
+    /*void LoadData(LoadDataArgs args)
     {
         if (grid != null)
         {
@@ -119,11 +120,37 @@
             Task.Run(async () => items = await Service.GetAllAsync());
             Task.Run(async () => await grid.Reload());
         }
-    }
+    }*/
 
     protected override async Task OnInitializedAsync()
     {
-        items = await Service.GetAllAsync();
+        try
+        {
+            items = await Service.GetAllAsync();
+        }
+        catch (Exception ex)
+        {
+            await NotifyError($"Erreur d'initialisation : {ex.Message}");
+        }
+    }
+
+    // RD : Récupérer les données via un nouveau DbContext (nouveau scope DI).
+    // Car Service utilise la même instance de DbContext (scope Blazor). 
+    // Quand le DbContext a déjà une entité suivie (tracking), il ne rafraîchit pas sa valeur depuis la base
+    // Il retourne la copie en cache.
+    // C'est pour ça qu'il faut un vrai rafraichissement de page pour avoir le nouveau DbContext modifié ailleurs.
+    private async Task RefreshDataAsync()
+    {
+        // nouveau scope > nouveau DbContext
+        using var scope = ServiceProvider.CreateScope();
+        var freshService = scope.ServiceProvider.GetRequiredService<GenericDataService<TEntity>>();
+
+        items = await freshService.GetAllAsync();   // liste réellement relue en base
+        selectedItem = default;
+        selectedItems = null;
+
+        await InvokeAsync(StateHasChanged);
+        await grid!.Reload();
     }
 
     private void OnRowSelect(object item)
@@ -187,7 +214,8 @@
 
         var result = await DialogService.OpenAsync<GenericEntityForm<TEntity>>(
             "Modifier un enregistrement",
-            new Dictionary<string, object> { { "Entity", clone }, { "IdPropertyName", IdPropertyName } }, new DialogOptions() { Width = "800px", Height = "95vh" }
+            new Dictionary<string, object> { { "Entity", clone }, { "IdPropertyName", IdPropertyName } }, 
+            new DialogOptions() { Width = "800px", Height = "95vh" }
         );
 
         if (result == true)
@@ -204,51 +232,45 @@
                         updateDone = true;
                         //items = await Service.GetAllAsync();
                         //await grid.Reload();
-                        //await NotifySuccess("Mise à jour réussie !");
+                        await NotifySuccess("Mise à jour réussie !");
                     }
-                    catch (ConcurrencyException ex)
+                    catch (ConcurrencyException)
                     {
-                        var attente = await DialogService.Alert("Conflit de modification, vos données n'ont pas été prises en compte", "Erreur mise à jour");
-                        //items = await Service.GetAllAsync();
-                        StateHasChanged();
-                        //await grid.Reload();
-                        /*
-                        // JQ : Affiche un message dans la page
-                        NotificationService.Notify(new NotificationMessage
-                        {
-                            Severity = NotificationSeverity.Error,
-                            Summary = "Conflit de modification, vos données n'ont pas été prises en compte",
-                            Detail = ex.Message,
-                            Duration = 4000
-                            });
-                        */
+						// RD : Conflit de modification, donc rafraichir la liste en copiant les données
+                        CopyProperties(selectedItemBeforUpdate, selectedItem);
+                        await DialogService.Alert("Conflit de modification, vos données n'ont pas été prises en compte", "Erreur mise à jour");
+
+						// RD : Appeler RefreshDataAsync pour recharger les nouvelles données
+                        await RefreshDataAsync();
+                    }
+                    catch (Exception ex)
+                    {
+                        await NotifyError($"Erreur : {ex.Message}");
+						Console.WriteLine($"Erreur : {ex.Message}");
+						logger.LogInformation($"Erreur : {ex.Message}");
+						logger.LogError(ex, "Erreur lors de la mise à jour de l'entité");
                     }
                     finally
                     {
-
                         if (updateDone)
                         {
                             await NotifySuccess("EditSelected - Mise à jour réussie !");
                         }
                         else
                         {
-                            CopyProperties(selectedItemBeforUpdate, selectedItem);
+                            if (selectedItem != null)
+                            {
+                                CopyProperties(selectedItemBeforUpdate, selectedItem);
+                            }
                             await NotifyError("EditSelected - Mise à jour non effectuée !");
-
                         }
-                        
-                        StateHasChanged();
-                        items = await Service.GetAllAsync();
                         await grid.Reload();
-                        await grid.RefreshDataAsync();
-                        
-                        //Navigation.Refresh(true);
                     }
                 }
             }
             catch (Exception ex)
             {
-                var attente = await DialogService.Alert(ex.Message, "Erreur mise à jour");
+                await DialogService.Alert(ex.Message, "Erreur mise à jour");
                 //await NotifyError(ex.Message);
             }
         }
