@@ -1,15 +1,24 @@
 ﻿@page "/test-db"
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Authorization
 @using GestionBudgétaire.Data
 @using GestionBudgétaire.Data.Entities.Database
 @using GestionBudgétaire.Data.Services.ToBeRemoved
+@using System.Security.Claims
+@inject AuthenticationStateProvider AuthStateProvider
+@inject NavigationManager NavigationManager
 
 @inject TestService TestService
 
-@* Page de test permet de contrôler l'accès à la base de données *@'
+@* Page de test permet de contrôler l'accès à la base de données *@
 
 <h3>Données de la table Dialogue</h3>
 
-@if (dialogues == null)
+@if (!isAuthorized)
+{
+    <p class="text-danger">Accès refusé. Vous n'avez pas les droits nécessaires.</p>
+}
+else if (dialogues == null)
 {
     <p>Chargement des données...</p>
 }
@@ -19,7 +28,7 @@ else if (!dialogues.Any())
 }
 else
 {
-    <table class="table">
+    <table class="table" Style="width: 100%;">
         <thead>
             <tr>
                 <th>DG_CODE</th>
@@ -44,19 +53,37 @@ else
 
 @code {
     private List<Dialogue>? dialogues;
+    private bool isAuthorized = false;
+    //private ClaimsPrincipal? user;
 
     protected override async Task OnInitializedAsync()
     {
         Console.WriteLine($"OnInitializedAsync test.razor - /test-db");
-        try
+
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity?.IsAuthenticated == true)
         {
-            dialogues = await TestService.GetDialoguesAsync();
-            // Limite l'affichage à 10 lignes
-            dialogues = dialogues.Take(10).ToList();
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Erreur lors de la récupération des données : {ex.Message}");
+            isAuthorized = user.Claims
+                .Where(c => c.Type == ClaimTypes.Role)
+                .Any(c => c.Value == "Admin");
+
+            if (!isAuthorized)
+            {
+                NavigationManager.NavigateTo("/not-authorized", forceLoad: true);
+                return;
+            }
+
+            try
+            {
+                dialogues = await TestService.GetDialoguesAsync();
+                dialogues = dialogues.Take(10).ToList();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Erreur lors de la récupération des données : {ex.Message}");
+            }
         }
     }
 }

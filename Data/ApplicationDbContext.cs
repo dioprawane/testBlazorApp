@@ -11,7 +11,7 @@ namespace GestionBudgétaire.Data
         public DbSet<Dialogue>? Dialogue { get; set; }
 
        //DbSet d'accès à la table des rôles applicatifs
-       public DbSet<AppUserRole> AppUserRoles { get; set; }
-       public DbSet<DemoEntityValue> DemoEntityValues { get; set; }
+       public DbSet<AppUserRole>? AppUserRoles { get; set; }
+       public DbSet<DemoEntityValue>? DemoEntityValues { get; set; }
     }
 }

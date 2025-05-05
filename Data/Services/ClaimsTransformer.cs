@@ -23,7 +23,7 @@ namespace GestionBudgétaire.Data.Services
             if (identity.Claims.Any(c => c.Type == ClaimTypes.Role && c.Issuer == "Custom"))
                 return principal;
 
-            var roles = await _dbContext.AppUserRoles
+            var roles = await _dbContext.AppUserRoles!
                 .Where(r => r.CompteAd == accountName)
                 .Select(r => r.Role)
                 .ToListAsync();

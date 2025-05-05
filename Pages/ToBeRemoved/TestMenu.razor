@@ -3,10 +3,11 @@
 @using Radzen
 @using Radzen.Blazor
 
-<h3>TestMenu</h3>
+<h3 style="margin-left: 20px;">TestMenu</h3>
 
-<div class="rz-p-sm-12" style="margin-bottom: 200px;">
-    <RadzenMenu Click="OnParentClicked">
+<div class="rz-p-sm-12" style="width: 100vw; margin: 0; padding: 0; margin-bottom: 100px;">
+
+    <RadzenMenu Click="OnParentClicked" Style="width: 100vw; border-radius: 0;">
         <RadzenMenuItem Text="General" Icon="home">
             <RadzenMenuItem Text="Buttons" Path="buttons" Icon="account_circle"></RadzenMenuItem>
             <RadzenMenuItem Text="Menu" Path="menu" Icon="line_weight" Disabled="true"></RadzenMenuItem>

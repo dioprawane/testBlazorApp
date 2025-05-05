@@ -3,6 +3,8 @@ using GestionBudgétaire.Data;
 using GestionBudgétaire.Data.Services;
 using GestionBudgétaire.Data.Services.ToBeRemoved;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.Components.Server;
 using Microsoft.EntityFrameworkCore;
 using Radzen;
 using Serilog;
@@ -61,6 +63,9 @@ namespace GestionBudgétaire
             // JQ : ajout pour l'utilisation de RadZen
             builder.Services.AddRadzenComponents();
 
+            // RD : // Permet d'utiliser AuthorizeView
+            builder.Services.AddAuthorizationCore();
+
             // Add services to the container.
             builder.Services.AddRazorComponents()
                 .AddInteractiveServerComponents();
@@ -91,6 +96,12 @@ namespace GestionBudgétaire
 
             // RD : Service de Test
             builder.Services.AddScoped<TestService>();
+
+            // RD : Activer l'affichage des erreurs détaillées
+            builder.Services.Configure<CircuitOptions>(options =>
+            {
+                options.DetailedErrors = true;
+            });
 
             var app = builder.Build();
 

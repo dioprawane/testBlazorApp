@@ -2,6 +2,9 @@
 @implements IDisposable
 @using Radzen
 
+@using System.Security.Claims
+@inject AuthenticationStateProvider AuthStateProvider
+
 @inject NavigationManager NavigationManager
 
 <nav class="navbar navbar-expand-md navbar-light mb-4 navbar-fixed" style="background-color: #e8c600;">
@@ -27,10 +30,18 @@
 
                 <!-- Groupe Tests -->
                 <RadzenMenuItem Style="margin-left: 5px;" Text="Tests" Icon="add_box">
-                    <RadzenMenuItem Text="Sensible" Path="sensible" Icon="add_box" class="custom-submenu-item" />
-                    <RadzenMenuItem Text="Test-Database" Path="test-db" Icon="add_box" class="custom-submenu-item" />
+                    <!--<RadzenMenuItem Text="Sensible" Path="sensible" Icon="add_box" class="custom-submenu-item" />
+                    <RadzenMenuItem Text="Test-Database" Path="test-db" Icon="add_box" class="custom-submenu-item" /> -->
                     <RadzenMenuItem Text="Menu" Path="menu" Icon="add_box" class="custom-submenu-item" />
                 </RadzenMenuItem>
+
+                @if (HasRole("Admin"))
+                {
+                    <RadzenMenuItem Style="margin-left: 5px;" Text="Ajouter" Icon="add_box">
+                        <RadzenMenuItem Text="Dialogue" Path="test-db" Icon="add_box" class="custom-submenu-item" />
+                        <RadzenMenuItem Text="Ligne budgétaire" Path="sensible" Icon="add_box" class="custom-submenu-item" />
+                    </RadzenMenuItem>
+                }
 
             </RadzenMenu>
         </div>
@@ -76,8 +87,26 @@
     private string? NavButtonCssClass => collapseNavMenu ? "collapsed" : null;
     private string? currentUrl;
 
-    protected override void OnInitialized()
+    private ClaimsPrincipal? user;
+    private List<string> roles = new();
+    private string? username;
+
+    //protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
+
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        user = authState.User;
+
+        if (user.Identity?.IsAuthenticated == true)
+        {
+            username = user.Identity.Name;
+            roles = user.Claims
+                .Where(c => c.Type == ClaimTypes.Role)
+                .Select(c => c.Value)
+                .ToList();
+        }
+
         currentUrl = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
         NavigationManager.LocationChanged += OnLocationChanged;
     }
@@ -97,4 +126,6 @@
     {
         NavigationManager.LocationChanged -= OnLocationChanged;
     }
+
+    private bool HasRole(string role) => roles.Contains(role);
 }

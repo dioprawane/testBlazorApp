@@ -198,8 +198,11 @@ Cette partie décrit les règles d’usages pour la gestion du repos. [Référen
 - [Source 1](https://learn.microsoft.com/fr-fr/ef/core/saving/concurrency?tabs=data-annotations)
 - [Source 2](https://learn.microsoft.com/fr-fr/aspnet/core/blazor/components/lifecycle?view=aspnetcore-8.0#state-management-and-rendering)
 - [Source 3](https://learn.microsoft.com/fr-fr/dotnet/api/microsoft.entityframeworkcore.changetracking.changetracker.clear?view=efcore-8.0)
-## Contacts
 
+### Secure controllers avec AspNetCore.Authorization
+- [Source](https://www.radzen.com/blazor-studio/documentation/security/identity/#:~:text=To%20require%20authorized%20access%20you%20need%20to%20decorate,code%20and%20add%20%5BAuthorize%5D%20before%20the%20class%20declaration.)
+
+## Contacts
 Pour toute question ou suggestion, n'hésitez pas à nous contacter :
 - **Nom** : QUIDORT Joël : **Chef de projet** & DIOP Serigne Rawane : **Développeur**
 - **Email** : [serigne-rawane.diop@acoss.fr](mailto:votre.email@example.com)
