@@ -1,0 +1,29 @@
+﻿@page "/user-info"
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Authorization
+@using System.Security.Claims
+@inject AuthenticationStateProvider AuthStateProvider
+@attribute [Authorize]
+@inject ILogger<InfosProfilePage> logger
+
+@if (user != null)
+{
+    <p>Votre identité @user.Identity?.Name !</p>
+    <GestionBudgétaire.Shared.UserProfile />
+    <GestionBudgétaire.Shared.UserRolesView />
+}
+else
+{
+    <p>Chargement de l'identité...</p>
+}
+
+@code {
+    private ClaimsPrincipal? user;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        user = authState.User;
+        logger.LogInformation("Test de log dans Home");
+    }
+}

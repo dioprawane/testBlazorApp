@@ -44,6 +44,25 @@
                 }
 
             </RadzenMenu>
+
+            @if (user != null && user.Identity?.IsAuthenticated == true)
+            {
+                <div class="d-flex align-items-center ms-auto me-2" style="background-color: #e8c600; border-radius: 20px; padding: 5px 15px;">
+                    <span class="me-2 text-dark fw-bold">@username</span>
+                    <RadzenProfileMenu Style="background-color: #e8c600;">
+                        <Template>
+                            <RadzenGravatar Email="@($"{username}@example.com")" Style="width: 40px; height: 40px;" />
+                        </Template>
+                        <ChildContent>
+                            <RadzenProfileMenuItem Text="Infos" Icon="person" Path="user-info" />
+                            <RadzenProfileMenuItem Text="Paramètres" Icon="settings" Path="/" />
+                            <RadzenProfileMenuItem Text="Déconnexion" Icon="logout" Click="@(() => Logout())" />
+                        </ChildContent>
+                    </RadzenProfileMenu>
+                </div>
+            }
+
+
         </div>
     </div>
 </nav>
@@ -91,10 +110,8 @@
     private List<string> roles = new();
     private string? username;
 
-    //protected override void OnInitialized()
     protected override async Task OnInitializedAsync()
     {
-
         var authState = await AuthStateProvider.GetAuthenticationStateAsync();
         user = authState.User;
 
@@ -128,4 +145,10 @@
     }
 
     private bool HasRole(string role) => roles.Contains(role);
+
+    private void Logout()
+    {
+        NavigationManager.NavigateTo("/", forceLoad: true);
+    }
+
 }
