@@ -52,11 +52,13 @@ jobs:
       uses: gittools/actions/gitversion/execute@v0.12.0
 
     - name: Show GitVersion output
-      run: echo "Version générée : ${{ steps.gitversion.outputs.fullSemVer }}"
+      run: |
+        echo "Version générée : ${{ steps.gitversion.outputs.fullSemVer }}"
+    
 
     #- name: Compilation
       #run: dotnet build --configuration Release --no-restore  # Compile l’application en mode Release sans refaire restore
-      
+
     - name: Compilation
       run: dotnet build --configuration Release --no-restore /p:Version=${{ steps.gitversion.outputs.fullSemVer }}
 
