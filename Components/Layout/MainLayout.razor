@@ -1,4 +1,5 @@
-﻿@inherits LayoutComponentBase
+﻿@using System.Reflection
+@inherits LayoutComponentBase
 
 @* Body avec mise en forme HTML *@
 <main class="container">
@@ -23,6 +24,14 @@
     <a href="" class="reload">Reload</a>
     <a class="dismiss">🗙</a>
 </div>
+
+<Footer>
+    <p>Version : @Assembly.GetExecutingAssembly().GetName().Version?.ToString()</p>
+</Footer>
+
+@code {
+    // Pas de using ici
+}
 
 <style>
     .container {
