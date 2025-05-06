@@ -15,6 +15,9 @@
 @inject MacroDesignationService MacroDesignationService
 @inject ILogger<EditionPage> Log
 @inject NavigationManager NavigationManager
+@inject NotificationService NotificationService
+
+<RadzenNotification />
 
 <PageTitle>Edit Dialogues</PageTitle>
 
@@ -84,6 +87,9 @@
             <RadzenButton ButtonStyle="ButtonStyle.Secondary" Icon="content_copy" Text="Dupliquer ligne selectionnée" Click="@DuplicateRow" Disabled="@(selectedDialogue == null)" />
         </HeaderTemplate>
         <Columns>
+            <!--RD : Pour le popup de confirmation en cas de suppresion-->
+            <ConfirmationDelete @ref="confirmationDelete" />
+
             <RadzenDataGridColumn Property="DG_CODE" Title="Code" Width="120px" Frozen="true" />
             <RadzenDataGridColumn Property="MACRO_DESIGNATION" Title="Macro Designation" Width="280px"
             FilterValue="@currentMacro" FilterOperator="Radzen.FilterOperator.Equals">
@@ -127,9 +133,9 @@
             </RadzenDataGridColumn>
             <RadzenDataGridColumn Context="dialogue" Filterable="false" Sortable="false" TextAlign="TextAlign.Right" Width="150px" Frozen="true" FrozenPosition="FrozenColumnPosition.Right">
                 <EditTemplate Context="dialogue">
-                    <RadzenButton Icon="check" ButtonStyle="ButtonStyle.Success" Variant="Variant.Flat" Size="ButtonSize.ExtraSmall" Click="@((args) => SaveRow(dialogue))" aria-label="Save" />
+                    <RadzenButton Icon="check" ButtonStyle="ButtonStyle.Success" Variant="Variant.Flat" Size="ButtonSize.ExtraSmall" Click="@((args) => SaveRow(dialogue))" BusyText="En cours ..." IsBusy=@busySave aria-label="Save" />
                     <RadzenButton Icon="close" ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat" Size="ButtonSize.ExtraSmall" Click="@((args) => CancelEdit(dialogue))" aria-label="Cancel" />
-                    <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="delete" Variant="Variant.Flat" Size="ButtonSize.ExtraSmall" Click="@(args => DeleteRow(dialogue))" aria-label="Delete" />
+                    <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="delete" Variant="Variant.Flat" Size="ButtonSize.ExtraSmall" Click="@(args => DeleteRow(dialogue))" BusyText="En cours ..." IsBusy=@busy Disabled="@(!deleteEnabled)" aria-label="Delete" />
                 </EditTemplate>
             </RadzenDataGridColumn>
         </Columns>
@@ -150,6 +156,15 @@
     int lignesToLoad = 12; // JQ : Paramétrage du nombre de lignes chargées par page
     string currentMacro = string.Empty;
 
+    // RD : Pour le loading spinner
+    private bool busy = false;
+    private bool busySave = false;
+    // RD : Pour le Dialog de confirmation
+    private ConfirmationDelete? confirmationDelete;
+
+    // RD : détermine si l'on autorise la suppression
+    private bool deleteEnabled = true;
+
     // TODO : JQ : portion de code à remplacer pour une initialisation à partir de la database
     //TitleOfMacro? c; // JQ : Gestion expérimenale d'un filtre custom sur la colonne macrodésignation
 
@@ -163,12 +178,12 @@
     // TODO : Fin
     /*
     void OnSelectedMacroChange(object value) // JQ : Callback de l'événement OnSelectRow du datagrid
-    {
-        if (currentMacro == TitleOfMacro.All)
         {
+        if (currentMacro == TitleOfMacro.All)
+            {
             currentMacro = null;
-            }
         }
+    }
     */
 
     IList<Dialogue>? selectedDialogue; // JQ Permet de garder la trace de l'élément en cours de selection
@@ -195,7 +210,7 @@
                 foreach (var macro in macroDesignations)
                 {
                     //Log.Information($"{macro.Id} - {macro.Name}");
-					Log.LogInformation("Macro : {Id} - {Name}", macro.Id, macro.Name);
+                    Log.LogInformation("Macro : {Id} - {Name}", macro.Id, macro.Name);
                 }
                 macroloaded = true;
             }
@@ -203,14 +218,14 @@
             selectedComment = selectedDialogue[0].COMMENTAIRES ?? ""; // JQ : Mise à jour de la zone commentaire en tête de page
 
             //Log.Information($"Initial load of {pagedData.Count} dialogues");
-			Log.LogInformation("Initial load of {Count} dialogues", pagedData.Count);
-            
+            Log.LogInformation("Initial load of {Count} dialogues", pagedData.Count);
+
         }
         catch (Exception ex)
         {
             //Log.Error($"An error occurred during initialization: {ex.Message}");
             // Gérer l'erreur ici (par exemple, afficher un message d'erreur)
-			Log.LogError(ex, "Error during initialization: {Message}", ex.Message);
+            Log.LogError(ex, "Error during initialization: {Message}", ex.Message);
         }
     }
 
@@ -254,7 +269,7 @@
         }
         catch (Exception ex)
         {
-			Log.LogError(ex, "Error loading data: {Message}", ex.Message);
+            Log.LogError(ex, "Error loading data: {Message}", ex.Message);
             //Log.Error($"An error occurred while loading data: {ex.Message}");
         }
     }
@@ -296,7 +311,37 @@
     // Enregistrement d'une ligne (appelé par le bouton Save)
     async Task SaveRow(Dialogue dialogue)
     {
-        await dialogueGrid!.UpdateRow(dialogue);
+        if (confirmationDelete != null)
+        {
+            busySave = true; // Affiche l'état "En cours ..."
+            confirmationDelete.ConfirmerAdd($"Êtes-vous sûre de vouloir ajouter cette ligne dans la BDD ?",
+            EventCallback.Factory.Create<bool>(this, async (confirm) =>
+            {
+                if (confirm)
+                {
+                    busySave = true; // Affiche l'état "En cours ..."
+
+                    await dialogueGrid!.UpdateRow(dialogue);
+
+                    busySave = false; // Affiche l'état "Terminé"
+                    NotificationService.Notify(new NotificationMessage
+                    {
+                    Severity = NotificationSeverity.Success,
+                    Summary = "Succès",
+                    Detail = "Ajout effectué avec succès.",
+                    Duration = 5000,
+                    Style = "background-color: #333333; color: white; border: 1px solid #00ff00; box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);"
+                    });
+
+                }
+                deleteEnabled = false;
+                busySave = false;
+            }));
+        }
+        // RD : Réactiver delete
+        deleteEnabled = true;
+        // RD : Ajouté pour éviter le warning d'une méthode async sans await
+        await Task.CompletedTask;
     }
 
     // Annulation de l'édition (appelé par le bouton Cancel)
@@ -313,18 +358,53 @@
             dialogueEntry.CurrentValues.SetValues(dialogueEntry.OriginalValues);
             dialogueEntry.State = EntityState.Unchanged;
         }
+        // RD : Pour libérer le spinner
+        busy = false;
+        busySave = false;
+
+        // RD : Réactiver delete
+        deleteEnabled = true;
     }
 
     // Suppression d'une ligne (appelé par le bouton Delete)
     async Task DeleteRow(Dialogue dialogue)
     {
+        Log.LogInformation("Debut DeleteRow !");
         Reset(dialogue);
 
-        var context = _contextFactory.CreateDbContext();
-        context.Remove<Dialogue>(dialogue);
-        context.SaveChanges();
+        if (confirmationDelete is not null)
+        {
+            Log.LogInformation("Dans confirmationDelete avant busy !");
+            busy = true; // Affiche l'état "En cours ..."
+            confirmationDelete.ConfirmerDelete($"Êtes-vous sûr de vouloir supprimer la ligne avec le code : {dialogue.DG_CODE} ?",
+            // RD : crée dynamiquement un EventCallback<bool> qui sera appelé lorsque l'utilisateur confirme ou annule l'action, transmettra un booléen (true = confirmé, false = annulé).
+            EventCallback.Factory.Create<bool>(this, async (confirm) =>
+            {
+                if (confirm)
+                {
+                    busy = true; // Affiche l'état "En cours ..."
 
-        await dialogueGrid!.Reload();
+                    var context = _contextFactory.CreateDbContext();
+                    context.Remove<Dialogue>(dialogue);
+                    context.SaveChanges();
+
+                    busy = false; // Affiche l'état "Terminé"
+                    NotificationService.Notify(new NotificationMessage
+                        {
+                            Severity = NotificationSeverity.Success,
+                            Summary = "Succès",
+                            Detail = "Suppression effectuée avec succès.",
+                            Duration = 5000,
+                            Style = "background-color: #333333; color: white; border: 1px solid #00ff00; box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);"
+                        });
+
+                        await dialogueGrid!.Reload();
+                    }
+                    busy = false;
+            }));
+        }
+        // RD : Ajouté pour éviter le warning d'une méthode async sans await
+        await Task.CompletedTask;
     }
 
     // Insertion d'une ligne (appelé par le bouton Ajouter une ligne)
@@ -334,6 +414,9 @@
         {
             Reset();
         }
+
+        // RD : Désactiver delete
+        deleteEnabled = false;
 
         var dialogue = new Dialogue();
         dialoguesToInsert.Add(dialogue);
@@ -347,6 +430,9 @@
         {
             Reset();
         }
+
+        // RD : Désactiver delete
+        deleteEnabled = false;
         
         var dialogue = new Dialogue();
         // JQ : Ici on initialise les champs conservés lors de la duplication

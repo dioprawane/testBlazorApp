@@ -1,0 +1,53 @@
+﻿@using Radzen
+@using Radzen.Blazor
+
+@code {
+    public bool ShowConfirmation { get; private set; }
+    public string? Message { get; private set; }
+    public EventCallback<bool> ConfirmationChanged { get; set; }
+
+    public void ConfirmerAdd(string message, EventCallback<bool> confirmationChanged)
+    {
+        Message = message;
+        ConfirmationChanged = confirmationChanged;
+        ShowConfirmation = true;
+        StateHasChanged();
+    }
+
+    public void ConfirmerDelete(string message, EventCallback<bool> confirmationChanged)
+    {
+        Message = message;
+        ConfirmationChanged = confirmationChanged;
+        ShowConfirmation = true;
+        StateHasChanged();
+    }
+
+    private void CloseDialog(bool confirmed)
+    {
+        ShowConfirmation = false;
+        ConfirmationChanged.InvokeAsync(confirmed);
+    }
+}
+
+@if (ShowConfirmation)
+{
+    <div class="modal show d-block" tabindex="-1" role="dialog" style="position: fixed; top: 20%; left: 50%; transform: translateX(-50%); z-index: 1050;">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <RadzenText TextStyle="TextStyle.H6" class="rz-mb-0" Style="text-align: center; font-size: 1.5rem;">Confirmation</RadzenText>
+                    <RadzenButton Icon="close" IconPosition="Left" ButtonStyle="ButtonStyle.Light" Click="() => CloseDialog(false)" Text="Fermer">
+                    </RadzenButton>
+                </div>
+                <RadzenText TextStyle="TextStyle.Body2" class="rz-mt-2" Style="text-align: center; font-size: 1.5rem; margin-left: 10px">@Message</RadzenText>
+                <div class="modal-footer">
+                    <div class="d-flex justify-content-between w-100">
+                        <RadzenButton Text="Confirmer" Icon="check" ButtonStyle="ButtonStyle.Primary" Click="() => CloseDialog(true)" Style="width: 160px;" />
+                        <RadzenButton Text="Annuler" Icon="close" ButtonStyle="ButtonStyle.Secondary" Click="() => CloseDialog(false)" Style="width: 160px;" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--<div class="modal-backdrop show" style="position: fixed; width: 100%; height: 100%; top: 100; left: 0; buttom: 0;"></div>-->
+}
