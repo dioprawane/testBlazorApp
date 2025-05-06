@@ -1,0 +1,391 @@
+﻿@page "/edition"
+@using Microsoft.AspNetCore.Components.Web
+@using GestionBudgétaire.Shared
+@using GestionBudgétaire.Data.Entities
+@using Radzen
+@using Radzen.Blazor
+@using System.Linq.Dynamic.Core
+@using Microsoft.EntityFrameworkCore
+@using GestionBudgétaire.Data.Services;
+@using GestionBudgétaire.Data.Entities.Custom;
+@using GestionBudgétaire.Data;
+@using GestionBudgétaire.Data.Entities.Database
+@inject IDbContextFactory<ApplicationDbContext> _contextFactory
+@inject DialogueService DialogueService
+@inject MacroDesignationService MacroDesignationService
+@inject ILogger<EditionPage> Log
+@inject NavigationManager NavigationManager
+
+<PageTitle>Edit Dialogues</PageTitle>
+
+<style>
+    .rz-grid-table {
+    width: unset;
+    }
+</style>
+
+<!-- JQ : Création d'une zone de rappel du commentaire de la ligne selectionnée dans le datagrid -->
+<RadzenCard Variant="Variant.Outlined" class="rz-my-4">
+    <RadzenStack Orientation="Radzen.Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem">
+        <div>
+            Description : @selectedComment
+        </div>
+    </RadzenStack>
+</RadzenCard>
+
+<!-- JQ : Changement de la police de caractère du datagrid -->
+<!-- TODO : JQ : Le changement de taille de la police ne semble pas fonctionner à vérifier -->
+<style>
+    .LigneBudgetaireGrid .rz-datagrid .rz-datagrid-cell {
+    font-family: 'Arial';
+    font-size: 0.25em !important;
+    }
+</style>
+
+<div class="LigneBudgetaireGrid">
+    <RadzenDataGrid @ref="dialogueGrid"
+    FilterMode="FilterMode.Advanced"
+    PagerHorizontalAlign="HorizontalAlign.Left"
+    TItem="Dialogue"
+    ColumnWidth="200px"
+    ShowPagingSummary="true"
+    Count="@totalRecords"
+    AllowAlternatingRows="false"
+    AllowFiltering="true"
+    AllowPaging="true"
+    PageSize="@lignesToLoad"
+    AllowSorting="true"
+    EditMode="@editMode"
+    Data="@pagedData"
+    GridLines="@GridLines"
+    Density="@Density"
+    SelectionMode="DataGridSelectionMode.Single"
+    @bind-Value=@selectedDialogue
+    RowUpdate="@OnUpdateRow"
+    RowCreate="@OnCreateRow"
+    LoadData="@LoadData"
+
+    RowSelect="@OnRowselect"
+    RowDoubleClick="@OnRowDoubleClick"
+    EqualsText="Est égal" ContainsText="Contient"
+    DoesNotContainText="Ne contient pas" StartsWithText="Débute par" EndsWithText="Termine par"
+    NotEqualsText="Différent de" LessThanText="Inférieur à" LessThanOrEqualsText="Inférieur ou égale à"
+    GreaterThanText="Supérieur à" GreaterThanOrEqualsText="Supérieur ou égale à"
+    IsNullText="Est nul" IsNotNullText="Est non nul" ApplyFilterText="Appliquer"
+    IsEmptyText="Est vide"
+    IsNotEmptyText="Est non vide"
+    ClearFilterText="Effacer"
+    OrOperatorText="Ou"
+    AndOperatorText="Et"
+    FilterText="Filtre">
+
+        <HeaderTemplate>
+            <RadzenButton ButtonStyle="ButtonStyle.Success" Icon="add_circle" Text="Ajouter une ligne" Click="@InsertRow" Disabled="@(editMode == DataGridEditMode.Single && dialoguesToInsert.Count() > 0)" />
+            <RadzenButton ButtonStyle="ButtonStyle.Secondary" Icon="content_copy" Text="Dupliquer ligne selectionnée" Click="@DuplicateRow" Disabled="@(selectedDialogue == null)" />
+        </HeaderTemplate>
+        <Columns>
+            <RadzenDataGridColumn Property="DG_CODE" Title="Code" Width="120px" Frozen="true" />
+            <RadzenDataGridColumn Property="MACRO_DESIGNATION" Title="Macro Designation" Width="280px"
+            FilterValue="@currentMacro" FilterOperator="Radzen.FilterOperator.Equals">
+                <FilterTemplate>
+                    <RadzenDropDown Data="@macroDesignations" @bind-Value="@currentMacro" TextProperty="Name" ValueProperty="Name" Change="@(args => dialogueGrid!.Reload())" Style="width:100%" />
+                    <!--
+                    <RadzenListBox @bind-Value="@currentMacro" TextProperty="Text" ValueProperty="Value" Style="width:100%;" InputAttributes="@(new Dictionary<string,object>(){ { "aria-label", "Filtre par Macro" }})"
+                    Change=@OnSelectedMacroChange
+                    Data="@(Enum.GetValues(typeof(TitleOfMacro)).Cast<TitleOfMacro?>().Select(t => new { Text = $"{t}", Value = t == TitleOfMacro.All ? null : t }))" />
+                    -->
+                </FilterTemplate>
+
+                <EditTemplate Context="dialogue">
+                    <RadzenTextBox @bind-Value="dialogue.MACRO_DESIGNATION" Style="width:100%" />
+                </EditTemplate>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn Property="NATURE_DU_BESOIN" Title="Nature du Besoin" Width="220px">
+                <EditTemplate Context="dialogue">
+                    <RadzenTextBox @bind-Value="dialogue.NATURE_DU_BESOIN" Style="width:100%" />
+                </EditTemplate>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn Property="CADRE_D_ACHAT" Title="Cadre d'achat" Width="220px">
+                <EditTemplate Context="dialogue">
+                    <RadzenTextBox @bind-Value="dialogue.CADRE_D_ACHAT" Style="width:100%" />
+                </EditTemplate>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn Property="FOURNISSEUR" Title="Fournisseur" Width="220px">
+                <EditTemplate Context="dialogue">
+                    <RadzenTextBox @bind-Value="dialogue.FOURNISSEUR" Style="width:100%" />
+                </EditTemplate>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn Property="COMMENTAIRES" Title="Comments" Width="220px">
+                <EditTemplate Context="dialogue">
+                    <RadzenTextBox @bind-Value="dialogue.COMMENTAIRES" Style="width:100%" />
+                </EditTemplate>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn Property="ANNEE" Title="Year" Width="120px">
+                <EditTemplate Context="dialogue">
+                    <RadzenNumeric @bind-Value="dialogue.ANNEE" Style="width:100%" />
+                </EditTemplate>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn Context="dialogue" Filterable="false" Sortable="false" TextAlign="TextAlign.Right" Width="150px" Frozen="true" FrozenPosition="FrozenColumnPosition.Right">
+                <EditTemplate Context="dialogue">
+                    <RadzenButton Icon="check" ButtonStyle="ButtonStyle.Success" Variant="Variant.Flat" Size="ButtonSize.ExtraSmall" Click="@((args) => SaveRow(dialogue))" aria-label="Save" />
+                    <RadzenButton Icon="close" ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat" Size="ButtonSize.ExtraSmall" Click="@((args) => CancelEdit(dialogue))" aria-label="Cancel" />
+                    <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="delete" Variant="Variant.Flat" Size="ButtonSize.ExtraSmall" Click="@(args => DeleteRow(dialogue))" aria-label="Delete" />
+                </EditTemplate>
+            </RadzenDataGridColumn>
+        </Columns>
+    </RadzenDataGrid>
+</div>
+
+@code {
+    RadzenDataGrid<Dialogue>? dialogueGrid;
+    List<Dialogue>? pagedData;
+    DataGridEditMode editMode = DataGridEditMode.Single;
+    List<Dialogue> dialoguesToInsert = new List<Dialogue>();
+    List<Dialogue> dialoguesToUpdate = new List<Dialogue>();
+    private int totalRecords;
+
+    bool macroloaded = false;
+    List<MacroDesignation>? macroDesignations;
+    string selectedComment = string.Empty; // JQ : Permet d'afficher en tête le commentaires de la ligne selectionnée
+    int lignesToLoad = 12; // JQ : Paramétrage du nombre de lignes chargées par page
+    string currentMacro = string.Empty;
+
+    // TODO : JQ : portion de code à remplacer pour une initialisation à partir de la database
+    //TitleOfMacro? c; // JQ : Gestion expérimenale d'un filtre custom sur la colonne macrodésignation
+
+    //public enum TitleOfMacro
+    //{
+    //    ADHESION,
+    //    STOCKAGE,
+    //    DATACENTER,
+    //    All = -1
+    //}
+    // TODO : Fin
+    /*
+    void OnSelectedMacroChange(object value) // JQ : Callback de l'événement OnSelectRow du datagrid
+    {
+        if (currentMacro == TitleOfMacro.All)
+        {
+            currentMacro = null;
+            }
+        }
+    */
+
+    IList<Dialogue>? selectedDialogue; // JQ Permet de garder la trace de l'élément en cours de selection
+
+    // JQ mise en forme de l'affichage de la table
+    Density Density = Density.Compact; // JQ densité d'affichage initiale compacte
+    Radzen.DataGridGridLines GridLines = Radzen.DataGridGridLines.Both; // JQ Lignage initial verticale et horizontal
+
+    void ClearSelection() // TODO : JQ : A supprimer hors phase de debug
+    {
+        selectedDialogue = null;
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            // Si vous avez besoin d'un préchargement ou d'une initialisation spécifique
+            pagedData = await DialogueService.GetTopDialoguesAsync(lignesToLoad);
+            totalRecords = await DialogueService.GetTotalDialoguesCountAsync(string.Empty);
+
+            if (!macroloaded){
+                macroDesignations = await MacroDesignationService.GetAllMacroDesignationAsync();
+                foreach (var macro in macroDesignations)
+                {
+                    //Log.Information($"{macro.Id} - {macro.Name}");
+					Log.LogInformation("Macro : {Id} - {Name}", macro.Id, macro.Name);
+                }
+                macroloaded = true;
+            }
+            selectedDialogue = pagedData.Take(1).ToList(); // JQ : place la barre de selection sur la première ligne de la page chargée
+            selectedComment = selectedDialogue[0].COMMENTAIRES ?? ""; // JQ : Mise à jour de la zone commentaire en tête de page
+
+            //Log.Information($"Initial load of {pagedData.Count} dialogues");
+			Log.LogInformation("Initial load of {Count} dialogues", pagedData.Count);
+            
+        }
+        catch (Exception ex)
+        {
+            //Log.Error($"An error occurred during initialization: {ex.Message}");
+            // Gérer l'erreur ici (par exemple, afficher un message d'erreur)
+			Log.LogError(ex, "Error during initialization: {Message}", ex.Message);
+        }
+    }
+
+    private async Task LoadData(LoadDataArgs args)
+    {
+        try
+        {
+            using var context = _contextFactory.CreateDbContext();
+
+            var query = context.Dialogue?.AsQueryable();
+
+            // Appliquer le filtrage
+            if (!string.IsNullOrWhiteSpace(args.Filter))
+            {
+                query = query?.Where(args.Filter); // Utilise System.Linq.Dynamic.Core pour interpréter la chaîne de filtre
+            }
+
+            // Appliquer le tri
+            if (!string.IsNullOrEmpty(args.OrderBy))
+            {
+                query = query?.OrderBy(args.OrderBy); // Utilise System.Linq.Dynamic.Core
+            }
+            else
+            {
+                query = query?.OrderBy(d => d.DG_CODE);
+            }
+
+            // Obtenir le nombre total de résultats (avant pagination)
+            if (query != null)
+            {
+                totalRecords = await query.CountAsync();
+
+                // Appliquer la pagination
+                pagedData = await query.Skip(args.Skip ?? 0).Take(args.Top ?? lignesToLoad).ToListAsync();
+            }
+
+            StateHasChanged(); // Mettre à jour l'interface après chargement des données
+
+            selectedDialogue = pagedData?.Take(1).ToList(); // JQ : place la barre de selection sur la première ligne de la page chargée
+            selectedComment = selectedDialogue?[0].COMMENTAIRES ?? ""; // JQ : Mise à jour de la zone commentaire en tête de page
+        }
+        catch (Exception ex)
+        {
+			Log.LogError(ex, "Error loading data: {Message}", ex.Message);
+            //Log.Error($"An error occurred while loading data: {ex.Message}");
+        }
+    }
+
+    async Task OnRowDoubleClick(DataGridRowMouseEventArgs<Dialogue> args) // JQ : Callback de l'action double clic sur une ligne
+    {
+        // JQ : Passage de la ligne selectionnée en mode édition
+        if (editMode == DataGridEditMode.Single && dialoguesToInsert.Count() > 0)
+        {
+            Reset();
+        }
+
+        dialoguesToUpdate.Add(args.Data);
+        await dialogueGrid!.EditRow(args.Data);
+    }
+
+    // Édition d'une ligne (appelé par le bouton Edit)
+    async Task EditRow(Dialogue dialogue)
+    {
+        if (editMode == DataGridEditMode.Single && dialoguesToInsert.Count() > 0)
+        {
+            Reset();
+        }
+
+        dialoguesToUpdate.Add(dialogue);
+        await dialogueGrid!.EditRow(dialogue);
+    }
+
+    // Mise à jour d'une ligne (appelé par le composant RadzenDataGrid)
+    void OnUpdateRow(Dialogue dialogue)
+    {
+        Reset(dialogue);
+
+        var context = _contextFactory.CreateDbContext();
+        context.Update(dialogue);
+        context.SaveChanges();
+    }
+
+    // Enregistrement d'une ligne (appelé par le bouton Save)
+    async Task SaveRow(Dialogue dialogue)
+    {
+        await dialogueGrid!.UpdateRow(dialogue);
+    }
+
+    // Annulation de l'édition (appelé par le bouton Cancel)
+    void CancelEdit(Dialogue dialogue)
+    {
+        Reset(dialogue);
+
+        dialogueGrid!.CancelEditRow(dialogue);
+
+        var context = _contextFactory.CreateDbContext();
+        var dialogueEntry = context.Entry(dialogue);
+        if (dialogueEntry.State == EntityState.Modified)
+        {
+            dialogueEntry.CurrentValues.SetValues(dialogueEntry.OriginalValues);
+            dialogueEntry.State = EntityState.Unchanged;
+        }
+    }
+
+    // Suppression d'une ligne (appelé par le bouton Delete)
+    async Task DeleteRow(Dialogue dialogue)
+    {
+        Reset(dialogue);
+
+        var context = _contextFactory.CreateDbContext();
+        context.Remove<Dialogue>(dialogue);
+        context.SaveChanges();
+
+        await dialogueGrid!.Reload();
+    }
+
+    // Insertion d'une ligne (appelé par le bouton Ajouter une ligne)
+    async Task InsertRow()
+    {
+        if (editMode == DataGridEditMode.Single)
+        {
+            Reset();
+        }
+
+        var dialogue = new Dialogue();
+        dialoguesToInsert.Add(dialogue);
+        await dialogueGrid!.InsertRow(dialogue);
+    }
+
+    // JQ : Insertion d'une ligne (appelé par le bouton Dupliquer la ligne selectionnée)
+    async Task DuplicateRow()
+    {
+        if (editMode == DataGridEditMode.Single)
+        {
+            Reset();
+        }
+        
+        var dialogue = new Dialogue();
+        // JQ : Ici on initialise les champs conservés lors de la duplication
+        dialogue.MACRO_DESIGNATION = selectedDialogue?[0].MACRO_DESIGNATION;
+        dialogue.NATURE_DU_BESOIN = selectedDialogue?[0].NATURE_DU_BESOIN;
+        dialogue.CADRE_D_ACHAT = selectedDialogue?[0].CADRE_D_ACHAT;
+        dialogue.FOURNISSEUR = selectedDialogue?[0].FOURNISSEUR;
+
+
+        dialoguesToInsert.Add(dialogue);
+        await dialogueGrid!.InsertRow(dialogue);
+    }
+
+    void OnRowselect(Dialogue dialogue)
+    {
+        selectedComment = dialogue.COMMENTAIRES ?? "";
+    }
+
+    // Création d'une ligne (appelé par le composant RadzenDataGrid) après l'insertion
+    void OnCreateRow(Dialogue dialogue)
+    {
+        var context = _contextFactory.CreateDbContext();
+        context.Add(dialogue);
+        context.SaveChanges();
+
+        dialoguesToInsert.Remove(dialogue);
+    }
+
+    // Réinitialiser les listes de dialogues à insérer et à mettre à jour (appelé par les méthodes d'annulation et de suppression)
+    void Reset()
+    {
+        dialoguesToInsert.Clear();
+        dialoguesToUpdate.Clear();
+    }
+
+    // Réinitialiser une ligne de dialogue (appelé par les méthodes de mise à jour, d'annulation et de suppression)
+    void Reset(Dialogue dialogue)
+    {
+        dialoguesToInsert.Remove(dialogue);
+        dialoguesToUpdate.Remove(dialogue);
+    }
+}

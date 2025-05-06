@@ -1,4 +1,5 @@
 ﻿using GestionBudgétaire.Data.Entities;
+using GestionBudgétaire.Data.Entities.Custom;
 using GestionBudgétaire.Data.Entities.Database;
 using Microsoft.EntityFrameworkCore;
 
@@ -10,8 +11,11 @@ namespace GestionBudgétaire.Data
         // Cette propriété permet de faire des requêtes et des opérations CRUD sur la table Dialogue
         public DbSet<Dialogue>? Dialogue { get; set; }
 
-       //DbSet d'accès à la table des rôles applicatifs
-       public DbSet<AppUserRole>? AppUserRoles { get; set; }
-       public DbSet<DemoEntityValue>? DemoEntityValues { get; set; }
+        //DbSet d'accès à la table des rôles applicatifs
+        public DbSet<AppUserRole>? AppUserRoles { get; set; }
+        public DbSet<DemoEntityValue>? DemoEntityValues { get; set; }
+
+        // Pour la macro désignation
+        public DbSet<MacroDesignation>? MacroDesignation { get; set; }
     }
 }

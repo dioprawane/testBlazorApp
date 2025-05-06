@@ -97,6 +97,10 @@ namespace GestionBudgétaire
             // RD : Service de Test
             builder.Services.AddScoped<TestService>();
 
+            // RD : Service de Dialogue et MacroDesignation
+            builder.Services.AddScoped<DialogueService>();
+            builder.Services.AddScoped<MacroDesignationService>();
+
             // RD : Activer l'affichage des erreurs détaillées
             builder.Services.Configure<CircuitOptions>(options =>
             {
