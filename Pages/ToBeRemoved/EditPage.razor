@@ -1,4 +1,4 @@
-﻿@page "/edition"
+﻿@page "/edition2"
 @using Microsoft.AspNetCore.Components.Web
 @using GestionBudgétaire.Shared
 @using GestionBudgétaire.Data.Entities
@@ -10,12 +10,14 @@
 @using GestionBudgétaire.Data.Entities.Custom;
 @using GestionBudgétaire.Data;
 @using GestionBudgétaire.Data.Entities.Database
+@using Microsoft.AspNetCore.Components.Authorization
 @inject IDbContextFactory<ApplicationDbContext> _contextFactory
 @inject DialogueService DialogueService
 @inject MacroDesignationService MacroDesignationService
 @inject ILogger<EditionPage> Log
 @inject NavigationManager NavigationManager
 @inject NotificationService NotificationService
+@inject AuthenticationStateProvider AuthStateProvider
 
 <RadzenNotification />
 
@@ -23,7 +25,7 @@
 
 <style>
     .rz-grid-table {
-    width: unset;
+        width: unset;
     }
 </style>
 
@@ -40,47 +42,46 @@
 <!-- TODO : JQ : Le changement de taille de la police ne semble pas fonctionner à vérifier -->
 <style>
     .LigneBudgetaireGrid .rz-datagrid .rz-datagrid-cell {
-    font-family: 'Arial';
-    font-size: 0.25em !important;
+        font-family: 'Arial';
+        font-size: 0.25em !important;
     }
 </style>
 
 <div class="LigneBudgetaireGrid">
     <RadzenDataGrid @ref="dialogueGrid"
-    FilterMode="FilterMode.Advanced"
-    PagerHorizontalAlign="HorizontalAlign.Left"
-    TItem="Dialogue"
-    ColumnWidth="200px"
-    ShowPagingSummary="true"
-    Count="@totalRecords"
-    AllowAlternatingRows="false"
-    AllowFiltering="true"
-    AllowPaging="true"
-    PageSize="@lignesToLoad"
-    AllowSorting="true"
-    EditMode="@editMode"
-    Data="@pagedData"
-    GridLines="@GridLines"
-    Density="@Density"
-    SelectionMode="DataGridSelectionMode.Single"
-    @bind-Value=@selectedDialogue
-    RowUpdate="@OnUpdateRow"
-    RowCreate="@OnCreateRow"
-    LoadData="@LoadData"
-
-    RowSelect="@OnRowselect"
-    RowDoubleClick="@OnRowDoubleClick"
-    EqualsText="Est égal" ContainsText="Contient"
-    DoesNotContainText="Ne contient pas" StartsWithText="Débute par" EndsWithText="Termine par"
-    NotEqualsText="Différent de" LessThanText="Inférieur à" LessThanOrEqualsText="Inférieur ou égale à"
-    GreaterThanText="Supérieur à" GreaterThanOrEqualsText="Supérieur ou égale à"
-    IsNullText="Est nul" IsNotNullText="Est non nul" ApplyFilterText="Appliquer"
-    IsEmptyText="Est vide"
-    IsNotEmptyText="Est non vide"
-    ClearFilterText="Effacer"
-    OrOperatorText="Ou"
-    AndOperatorText="Et"
-    FilterText="Filtre">
+                    FilterMode="FilterMode.Advanced"
+                    PagerHorizontalAlign="HorizontalAlign.Left"
+                    TItem="Dialogue"
+                    ColumnWidth="200px"
+                    ShowPagingSummary="true"
+                    Count="@totalRecords"
+                    AllowAlternatingRows="false"
+                    AllowFiltering="true"
+                    AllowPaging="true"
+                    PageSize="@lignesToLoad"
+                    AllowSorting="true"
+                    EditMode="@editMode"
+                    Data="@pagedData"
+                    GridLines="@GridLines"
+                    Density="@Density"
+                    SelectionMode="DataGridSelectionMode.Single"
+                    @bind-Value=@selectedDialogue
+                    RowUpdate="@OnUpdateRow"
+                    RowCreate="@OnCreateRow"
+                    LoadData="@LoadData"
+                    RowSelect="@OnRowselect"
+                    RowDoubleClick="@OnRowDoubleClick"
+                    EqualsText="Est égal" ContainsText="Contient"
+                    DoesNotContainText="Ne contient pas" StartsWithText="Débute par" EndsWithText="Termine par"
+                    NotEqualsText="Différent de" LessThanText="Inférieur à" LessThanOrEqualsText="Inférieur ou égale à"
+                    GreaterThanText="Supérieur à" GreaterThanOrEqualsText="Supérieur ou égale à"
+                    IsNullText="Est nul" IsNotNullText="Est non nul" ApplyFilterText="Appliquer"
+                    IsEmptyText="Est vide"
+                    IsNotEmptyText="Est non vide"
+                    ClearFilterText="Effacer"
+                    OrOperatorText="Ou"
+                    AndOperatorText="Et"
+                    FilterText="Filtre">
 
         <HeaderTemplate>
             <RadzenButton ButtonStyle="ButtonStyle.Success" Icon="add_circle" Text="Ajouter une ligne" Click="@InsertRow" Disabled="@(editMode == DataGridEditMode.Single && dialoguesToInsert.Count() > 0)" />
@@ -92,7 +93,7 @@
 
             <RadzenDataGridColumn Property="DG_CODE" Title="Code" Width="120px" Frozen="true" />
             <RadzenDataGridColumn Property="MACRO_DESIGNATION" Title="Macro Designation" Width="280px"
-            FilterValue="@currentMacro" FilterOperator="Radzen.FilterOperator.Equals">
+                                  FilterValue="@currentMacro" FilterOperator="Radzen.FilterOperator.Equals">
                 <FilterTemplate>
                     <RadzenDropDown Data="@macroDesignations" @bind-Value="@currentMacro" TextProperty="Name" ValueProperty="Name" Change="@(args => dialogueGrid!.Reload())" Style="width:100%" />
                     <!--
@@ -205,7 +206,8 @@
             pagedData = await DialogueService.GetTopDialoguesAsync(lignesToLoad);
             totalRecords = await DialogueService.GetTotalDialoguesCountAsync(string.Empty);
 
-            if (!macroloaded){
+            if (!macroloaded)
+            {
                 macroDesignations = await MacroDesignationService.GetAllMacroDesignationAsync();
                 foreach (var macro in macroDesignations)
                 {
@@ -229,7 +231,7 @@
         }
     }
 
-    private async Task LoadData(LoadDataArgs args)
+    /*private async Task LoadData(LoadDataArgs args)
     {
         try
         {
@@ -271,6 +273,56 @@
         {
             Log.LogError(ex, "Error loading data: {Message}", ex.Message);
             //Log.Error($"An error occurred while loading data: {ex.Message}");
+        }
+    }*/
+
+    private async Task LoadData(LoadDataArgs args)
+    {
+        try
+        {
+            var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+            var user = authState.User;
+
+            if (user.Identity is null || !user.Identity.IsAuthenticated)
+            {
+                NavigationManager.NavigateTo("/non-authoriser", forceLoad: true);
+                return;
+            }
+
+            using var context = _contextFactory.CreateDbContext();
+            var query = context.Dialogue?.AsQueryable();
+
+            // 🔒 Ne garder que les données du portefeuille SDAT
+            query = query?.Where(d => d.PORTEFEUILLE_STANDARDISE == "SDAE");
+
+            if (!string.IsNullOrWhiteSpace(args.Filter))
+            {
+                query = query?.Where(args.Filter);
+            }
+
+            if (!string.IsNullOrEmpty(args.OrderBy))
+            {
+                query = query?.OrderBy(args.OrderBy);
+            }
+            else
+            {
+                query = query?.OrderBy(d => d.DG_CODE);
+            }
+
+            if (query != null)
+            {
+                totalRecords = await query.CountAsync();
+                pagedData = await query.Skip(args.Skip ?? 0).Take(args.Top ?? lignesToLoad).ToListAsync();
+            }
+
+            StateHasChanged();
+
+            selectedDialogue = pagedData?.Take(1).ToList();
+            selectedComment = selectedDialogue?[0].COMMENTAIRES ?? "";
+        }
+        catch (Exception ex)
+        {
+            Log.LogError(ex, "Error loading data: {Message}", ex.Message);
         }
     }
 
@@ -325,13 +377,13 @@
 
                     busySave = false; // Affiche l'état "Terminé"
                     NotificationService.Notify(new NotificationMessage
-                    {
-                    Severity = NotificationSeverity.Success,
-                    Summary = "Succès",
-                    Detail = "Ajout effectué avec succès.",
-                    Duration = 5000,
-                    Style = "background-color: #333333; color: white; border: 1px solid #00ff00; box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);"
-                    });
+                        {
+                            Severity = NotificationSeverity.Success,
+                            Summary = "Succès",
+                            Detail = "Ajout effectué avec succès.",
+                            Duration = 5000,
+                            Style = "background-color: #333333; color: white; border: 1px solid #00ff00; box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);"
+                        });
 
                 }
                 deleteEnabled = false;
@@ -398,9 +450,9 @@
                             Style = "background-color: #333333; color: white; border: 1px solid #00ff00; box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);"
                         });
 
-                        await dialogueGrid!.Reload();
-                    }
-                    busy = false;
+                    await dialogueGrid!.Reload();
+                }
+                busy = false;
             }));
         }
         // RD : Ajouté pour éviter le warning d'une méthode async sans await
@@ -433,7 +485,7 @@
 
         // RD : Désactiver delete
         deleteEnabled = false;
-        
+
         var dialogue = new Dialogue();
         // JQ : Ici on initialise les champs conservés lors de la duplication
         dialogue.MACRO_DESIGNATION = selectedDialogue?[0].MACRO_DESIGNATION;
