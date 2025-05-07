@@ -21,6 +21,9 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4  # Clone le code source du dépôt
 
+    - name: Cloner le projet de tests externes
+      run: git clone https://github.com/dioprawane/GestionBudgetTest.git TestsExternes
+
     - name: Installation .NET du sdk
       uses: actions/setup-dotnet@v4
       with:
@@ -40,12 +43,15 @@ jobs:
     #     mysql --host=pro69valo.urdom.ad.recouv --user=perfeco --password=$PASSWORDMYSQL dialogue_gestion -e "SHOW DATABASES;"
 
     - name: Intallation/Restauration des dépendances
-      run: dotnet restore    # Restaure/installe les dépendances NuGet
+      #run: dotnet restore    # Restaure/installe les dépendances NuGet
+      run: |
+        dotnet restore GestionBudgétaire/GestionBudgétaire.csproj
+        dotnet restore TestsExternes/GestionBudgetaireTest.csproj
 
     - name: Install GitVersion
       uses: gittools/actions/gitversion/setup@v0.12.0
       with:
-        versionSpec: '1.x'
+        versionSpec: '5.x'
 
     - name: Run GitVersion
       id: gitversion
@@ -55,15 +61,11 @@ jobs:
       run: |
         echo "Version générée : ${{ steps.gitversion.outputs.fullSemVer }}"
     
-
     #- name: Compilation
       #run: dotnet build --configuration Release --no-restore  # Compile l’application en mode Release sans refaire restore
 
     - name: Compilation
       run: dotnet build --configuration Release --no-restore /p:Version=${{ steps.gitversion.outputs.fullSemVer }}
-
-    - name: Cloner le projet de tests externes
-      run: git clone https://github.com/dioprawane/GestionBudgetTest.git TestsExternes
 
     - name: Lancer les tests du projet externe
       run: dotnet test TestsExternes/GestionBudgetaireTest.csproj --no-restore --configuration Release --verbosity normal --logger "trx;LogFileName=test_results.trx" --results-directory "TestResults"
