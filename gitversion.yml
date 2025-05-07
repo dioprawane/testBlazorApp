@@ -1,10 +1,5 @@
-next-version: 0.1.0
 mode: ContinuousDeployment
-assembly-versioning-scheme: MajorMinorPatch
-assembly-file-versioning-scheme: MajorMinorPatch
-assembly-informational-format: '{FullSemVer}'
-commit-message-incrementing: Enabled
-
+next-version: 0.1.0
 branches:
   master:
     regex: ^master$
@@ -12,6 +7,9 @@ branches:
   features:
     regex: ^features[/-]
     increment: Patch
-
+  pull-request:
+    regex: ^(pull|pr)[/-]
+    tag: PullRequest
+    increment: Inherit
 ignore:
   sha: []
