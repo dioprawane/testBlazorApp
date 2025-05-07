@@ -70,7 +70,7 @@ jobs:
         dotnet new tool-manifest --force
         dotnet tool install GitVersion.Tool --version 6.3.0
         dotnet tool run dotnet-gitversion \
-          /updateassemblyinfo GestionBudgétaire/Properties/AssemblyInfo.cs \
+          /updateassemblyinfo Properties/AssemblyInfo.cs \
           /ensureassemblyinfo \
           /config gitversion.yml      
       env:
