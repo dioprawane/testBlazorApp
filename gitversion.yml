@@ -1,15 +1,17 @@
 next-version: 0.1.0
-mode: Mainline
+mode: ContinuousDeployment
 assembly-versioning-scheme: MajorMinorPatch
 assembly-file-versioning-scheme: MajorMinorPatch
 assembly-informational-format: '{FullSemVer}'
 commit-message-incrementing: Enabled
 
 branches:
-  main:
-    regex: ^master$|^main$
+  master:
+    regex: ^master$
     increment: Minor
-
   features:
-    regex: ^features?[/-]
+    regex: ^features[/-]
     increment: Patch
+
+ignore:
+  sha: []
