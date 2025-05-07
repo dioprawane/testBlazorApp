@@ -64,6 +64,10 @@ jobs:
     - name: Show GitVersion output
       run: |
         echo "Version générée : ${{ steps.gitversion.outputs.fullSemVer }}"
+
+    - name: Inject version in AssemblyInfo.cs
+      run: |
+        dotnet-gitversion /updateassemblyinfo GestionBudgétaire/Properties/AssemblyInfo.cs /ensureassemblyinfo /config gitversion.yml      
     
     #- name: Compilation
       #run: dotnet build --configuration Release --no-restore  # Compile l’application en mode Release sans refaire restore
