@@ -9,7 +9,6 @@ branches:
   main:
     regex: ^master$|^main$
     increment: Minor
-    is-mainline: true
 
   features:
     regex: ^features?[/-]
