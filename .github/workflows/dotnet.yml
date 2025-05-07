@@ -45,7 +45,7 @@ jobs:
     - name: Intallation/Restauration des dépendances
       #run: dotnet restore    # Restaure/installe les dépendances NuGet
       run: |
-        dotnet restore GestionBudget/GestionBudgétaire.csproj
+        dotnet restore GestionBudgétaire.csproj
         dotnet restore TestsExternes/GestionBudgetaireTest.csproj
 
     - name: Install GitVersion
