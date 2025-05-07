@@ -72,18 +72,19 @@ jobs:
       #run: dotnet build --configuration Release --no-restore /p:Version=${{ steps.gitversion.outputs.fullSemVer }}
       run: dotnet build GestionBudgétaire.csproj --configuration Release --no-restore /p:Version=${{ steps.gitversion.outputs.fullSemVer }}
 
-    - name: Build du projet
+    - name: Build du projet de tests
       run: |
         dotnet build ../GestionBudgetTest/GestionBudgetaireTest.csproj --no-restore --verbosity quiet
     
-    - name: Lancer les tests du projet externe
+    - name: Lancer les tests avec affichage console et rapport TRX
       run: |
         dotnet test ../GestionBudgetTest/GestionBudgetaireTest.csproj \
           --no-restore \
           --no-build \
           --verbosity minimal \
+          --logger "console;verbosity=detailed" \
           --logger "trx;LogFileName=TestResults.trx" \
-          --results-directory ./TestResults    
+          --results-directory ./TestResults       
         
     - name: Upload test results
       uses: actions/upload-artifact@v4
