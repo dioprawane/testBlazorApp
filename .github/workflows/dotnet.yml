@@ -50,7 +50,7 @@ jobs:
       #run: dotnet restore    # Restaure/installe les dépendances NuGet
       run: |
         dotnet restore GestionBudgétaire.csproj
-        dotnet restore TestsExternes/GestionBudgetaireTest.csproj
+        dotnet restore ../GestionBudgetTest/GestionBudgetaireTest.csproj
 
     - name: Install GitVersion
       uses: gittools/actions/gitversion/setup@v0.12.0
