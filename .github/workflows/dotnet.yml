@@ -71,7 +71,10 @@ jobs:
       run: dotnet build GestionBudgétaire.csproj --configuration Release --no-restore /p:Version=${{ steps.gitversion.outputs.fullSemVer }}
 
     - name: Lancer les tests du projet externe
-      run: dotnet test TestsExternes/GestionBudgetaireTest.csproj --no-restore --configuration Release --verbosity normal --logger "trx;LogFileName=test_results.trx" --results-directory "TestResults"
+      #run: dotnet test TestsExternes/GestionBudgetaireTest.csproj --no-restore --configuration Release --verbosity normal --logger "trx;LogFileName=test_results.trx" --results-directory "TestResults"
+      run: |
+        dotnet build TestsExternes/GestionBudgetaireTest.csproj --configuration Release
+        dotnet test TestsExternes/GestionBudgetaireTest.csproj --no-restore --verbosity normal --logger "trx;LogFileName=test_results.trx" --results-directory "TestResults"
 
     - name: Upload test results
       uses: actions/upload-artifact@v4
