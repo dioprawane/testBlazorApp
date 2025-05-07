@@ -69,7 +69,10 @@ jobs:
       run: |
         dotnet new tool-manifest --force
         dotnet tool install GitVersion.Tool --version 6.3.0
-        dotnet tool run gitversion /updateassemblyinfo GestionBudgétaire/Properties/AssemblyInfo.cs /ensureassemblyinfo /config GestionBudgétaire/gitversion.yml           
+        dotnet tool run dotnet-gitversion \
+          /updateassemblyinfo GestionBudgétaire/Properties/AssemblyInfo.cs \
+          /ensureassemblyinfo \
+          /config GestionBudgétaire/gitversion.yml      
       env:
         PATH: ${{ env.PATH }}:/home/runner/.dotnet/tools      
 
