@@ -7,8 +7,5 @@ branches:
   features:
     regex: ^features[/-]
     increment: Patch
-  pull-request:
-    regex: ^(pull|pr)[/-]
-    increment: Inherit
 ignore:
   sha: []
