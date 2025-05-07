@@ -65,6 +65,13 @@ jobs:
       run: |
         echo "Version générée : ${{ steps.gitversion.outputs.fullSemVer }}"
 
+    - name: Inject version into AssemblyInfo.cs
+      run: |
+        dotnet tool install --global GitVersion.Tool --version 6.3.0
+        dotnet-gitversion /updateassemblyinfo GestionBudgétaire/Properties/AssemblyInfo.cs /ensureassemblyinfo /config GestionBudgétaire/gitversion.yml
+      env:
+        PATH: ${{ env.PATH }}:/home/runner/.dotnet/tools      
+
     #- name: Inject version in AssemblyInfo.cs
       #run: |
         #dotnet-gitversion /updateassemblyinfo GestionBudgétaire/Properties/AssemblyInfo.cs /ensureassemblyinfo /config gitversion.yml      
