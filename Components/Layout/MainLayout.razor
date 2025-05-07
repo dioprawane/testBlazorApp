@@ -26,12 +26,22 @@
 </div>
 
 <Footer>
-    <p>Version : @Assembly.GetExecutingAssembly().GetName().Version?.ToString()</p>
+    <!--<p>Version : @Assembly.GetExecutingAssembly().GetName().Version?.ToString()</p>-->
+    <p>Version : @_informationalVersion</p>
 </Footer>
 
 @code {
-    // Pas de using ici
+    private string? _informationalVersion;
+
+    protected override void OnInitialized()
+    {
+        _informationalVersion = Assembly
+            .GetExecutingAssembly()
+            .GetCustomAttribute<AssemblyInformationalVersionAttribute>()?
+            .InformationalVersion;
+    }
 }
+
 
 <style>
     .container {
