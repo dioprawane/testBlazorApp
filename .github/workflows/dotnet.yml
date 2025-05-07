@@ -76,11 +76,13 @@ jobs:
       run: dotnet build ../GestionBudgetTest/GestionBudgetaireTest.csproj --configuration Release
     
     - name: Lancer les tests du projet externe
-      run: dotnet test ../GestionBudgetTest/GestionBudgetaireTest.csproj \
-            --no-restore \
-            --verbosity normal \
-            --logger "trx;LogFileName=TestResults.trx" \
-            --results-directory ./TestResults
+      run: |
+        dotnet test ../GestionBudgetTest/GestionBudgetaireTest.csproj \
+          --no-restore \
+          --verbosity normal \
+          --logger "trx;LogFileName=TestResults.trx" \
+          --results-directory ./TestResults
+
 
     - name: Upload test results
       uses: actions/upload-artifact@v4
