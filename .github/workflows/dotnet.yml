@@ -43,10 +43,10 @@ jobs:
     #     mysql --host=pro69valo.urdom.ad.recouv --user=perfeco --password=$PASSWORDMYSQL dialogue_gestion -e "SHOW DATABASES;"
 
     - name: Intallation/Restauration des dépendances
-      #run: dotnet restore    # Restaure/installe les dépendances NuGet
-      run: |
-        dotnet restore GestionBudget/GestionBudgétaire.csproj
-        dotnet restore TestsExternes/GestionBudgetaireTest.csproj
+      run: dotnet restore    # Restaure/installe les dépendances NuGet
+      #run: |
+        #dotnet restore GestionBudget/GestionBudgétaire.csproj
+        #dotnet restore TestsExternes/GestionBudgetaireTest.csproj
 
     - name: Install GitVersion
       uses: gittools/actions/gitversion/setup@v0.12.0
