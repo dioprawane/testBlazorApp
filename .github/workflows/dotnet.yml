@@ -66,7 +66,7 @@ jobs:
 
     - name: Compilation
       #run: dotnet build --configuration Release --no-restore /p:Version=${{ steps.gitversion.outputs.fullSemVer }}
-      run: dotnet build GestionBudget/GestionBudgétaire.csproj --configuration Release --no-restore /p:Version=${{ steps.gitversion.outputs.fullSemVer }}
+      run: dotnet build GestionBudgétaire.csproj --configuration Release --no-restore /p:Version=${{ steps.gitversion.outputs.fullSemVer }}
 
     - name: Lancer les tests du projet externe
       run: dotnet test TestsExternes/GestionBudgetaireTest.csproj --no-restore --configuration Release --verbosity normal --logger "trx;LogFileName=test_results.trx" --results-directory "TestResults"
