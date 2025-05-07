@@ -25,10 +25,70 @@
     <a class="dismiss">🗙</a>
 </div>
 
-<Footer>
-    <!--<p>Version : @Assembly.GetExecutingAssembly().GetName().Version?.ToString()</p>-->
-    <p>Version : @_informationalVersion</p>
-</Footer>
+<footer class="bg-dark text-light pt-5">
+    <div class="container">
+        <!-- 1re rangée : logo + colonnes de liens -->
+        <div class="row gy-4">
+            <!-- Logo + tagline -->
+            <div class="col-12 col-lg-4">
+                <h3 class="fw-bold text-uppercase mb-2">Company Logo</h3>
+                <p class="text-muted mb-lg-0">It's easier than you think.</p>
+            </div>
+
+            <!-- Colonne : Products -->
+            <div class="col-6 col-sm-4 col-lg-2">
+                <h6 class="fw-bold mb-3">Products</h6>
+                <ul class="list-unstyled">
+                    <li><a class="footer-link" href="#">Product 1</a></li>
+                    <li><a class="footer-link" href="#">Product 2</a></li>
+                    <li><a class="footer-link" href="#">Product 3</a></li>
+                    <li><a class="footer-link" href="#">Product 4</a></li>
+                </ul>
+            </div>
+
+            <!-- Colonne : Solutions -->
+            <div class="col-6 col-sm-4 col-lg-2">
+                <h6 class="fw-bold mb-3">Solutions</h6>
+                <ul class="list-unstyled">
+                    <li><a class="footer-link" href="#">Solution 1</a></li>
+                    <li><a class="footer-link" href="#">Solution 2</a></li>
+                    <li><a class="footer-link" href="#">Solution 3</a></li>
+                    <li><a class="footer-link" href="#">Solution 4</a></li>
+                    <li><a class="footer-link" href="#">Solution 5</a></li>
+                </ul>
+            </div>
+
+            <!-- Colonne : Company -->
+            <div class="col-6 col-sm-4 col-lg-2">
+                <h6 class="fw-bold mb-3">Company</h6>
+                <ul class="list-unstyled">
+                    <li><a class="footer-link" href="#">About us</a></li>
+                    <li><a class="footer-link" href="#">Blogs</a></li>
+                    <li><a class="footer-link" href="#">Support</a></li>
+                    <li><a class="footer-link" href="#">Jobs</a></li>
+                </ul>
+            </div>
+
+            <!-- Colonne : Legal -->
+            <div class="col-6 col-sm-4 col-lg-2">
+                <h6 class="fw-bold mb-3">Legal</h6>
+                <ul class="list-unstyled">
+                    <li><a class="footer-link" href="#">Privacy policy</a></li>
+                    <li><a class="footer-link" href="#">Terms of use</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Trait de séparation -->
+        <hr class="opacity-25 my-4" />
+
+        <!-- 2e rangée : copyright + version -->
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-center pb-3">
+            <small>&copy; @DateTime.Now.Year, Company Name Inc. All rights reserved.</small>
+            <small class="mt-2 mt-md-0">Version : @_informationalVersion</small>
+        </div>
+    </div>
+</footer>
 
 @code {
     private string? _informationalVersion;
@@ -51,6 +111,17 @@
         width: 100%;
         max-width: 100%;
     }
+
+    .footer-link {
+        color: #adb5bd; /* gris clair Bootstrap */
+        text-decoration: none;
+        transition: color .2s ease;
+    }
+
+        .footer-link:hover {
+            color: #ffffff; /* blanc au survol */
+            text-decoration: underline;
+        }
 
     #blazor-error-ui {
         background: lightyellow;
