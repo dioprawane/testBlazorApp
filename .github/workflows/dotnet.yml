@@ -72,7 +72,7 @@ jobs:
         dotnet tool run dotnet-gitversion \
           /updateassemblyinfo GestionBudgétaire/Properties/AssemblyInfo.cs \
           /ensureassemblyinfo \
-          /config GestionBudgétaire/gitversion.yml      
+          /config gitversion.yml      
       env:
         PATH: ${{ env.PATH }}:/home/runner/.dotnet/tools      
 
