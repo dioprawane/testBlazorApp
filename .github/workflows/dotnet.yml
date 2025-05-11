@@ -21,15 +21,7 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4  # Clone le code source du dépôt
       with:
-        fetch-depth: 0  # Permet à GitVersion d’avoir l'historique complet
-      
-    - name: Fetch full history (only if shallow)
-      run: |
-        if git rev-parse --is-shallow-repository | grep true; then
-          git fetch --prune --unshallow --tags
-        else
-          git fetch --prune --tags
-        fi        
+        fetch-depth: 0  # Permet à GitVersion d’avoir l'historique complet   
 
     #- name: Cloner le projet de tests externes
       #run: git clone https://github.com/dioprawane/GestionBudgetTest.git TestsExternes
@@ -72,8 +64,6 @@ jobs:
     - name: Show GitVersion output
       run: |
         echo "GitVersion (fullSemVer): ${{ steps.gitversion.outputs.fullSemVer }}"
-        echo "GitVersion (nugetVersionV2): ${{ steps.gitversion.outputs.nugetVersionV2 }}"
-        echo "GitVersion (branch): ${{ steps.gitversion.outputs.branchName }}"
 
     - name: Inject version into AssemblyInfo.cs
       run: |
@@ -114,5 +104,3 @@ jobs:
       with:
         name: TestResults
         path: ./TestResults
-
-      

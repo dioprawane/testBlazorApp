@@ -203,7 +203,7 @@ Cette partie décrit les règles d’usages pour la gestion du repos. [Référen
 - [Source](https://www.radzen.com/blazor-studio/documentation/security/identity/#:~:text=To%20require%20authorized%20access%20you%20need%20to%20decorate,code%20and%20add%20%5BAuthorize%5D%20before%20the%20class%20declaration.)
 
 ### Commandes Versions 
-`dotnet-gitversion /updateassemblyinfo Properties/AssemblyInfo.cs /ensureassemblyinfo /config gitversion.yml`
+`dotnet-gitversion /updateassemblyinfo Properties/AssemblyInfo.cs /ensureassemblyinfo /config gitversion.yml` : a exécuté pour avoir la version à jour
 le dernier a renvoyé ceci : [assembly: AssemblyInformationalVersion("0.1.0-fusion-projets.1+94.Branch.fusion-projets.Sha.81850aae07665dc5eea85c9ab93bf1e7d3abcf29")]
 
 ## Contacts

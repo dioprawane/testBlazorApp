@@ -17,8 +17,6 @@ branches:
     increment: Inherit
     track-merge-target: true
     label: ''
-    # On ne précise pas source-branches, ce qui accepte toutes par défaut
-    # ou mets celles que tu veux : master, features, etc.
 
 ignore:
   sha: []
