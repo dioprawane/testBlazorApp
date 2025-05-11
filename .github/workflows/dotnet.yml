@@ -22,6 +22,9 @@ jobs:
       uses: actions/checkout@v4  # Clone le code source du dépôt
       with:
         fetch-depth: 0  # Permet à GitVersion d’avoir l'historique complet
+      
+    - name: Fetch full history to help GitVersion
+      run: git fetch --prune --unshallow --tags      
 
     #- name: Cloner le projet de tests externes
       #run: git clone https://github.com/dioprawane/GestionBudgetTest.git TestsExternes
