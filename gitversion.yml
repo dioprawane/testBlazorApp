@@ -16,6 +16,7 @@ branches:
     regex: ^(pull|pull-requests)/\d+/merge$
     increment: Inherit
     track-merge-target: true
+    label: pr
     # On ne précise pas source-branches, ce qui accepte toutes par défaut
     # ou mets celles que tu veux : master, features, etc.
 
