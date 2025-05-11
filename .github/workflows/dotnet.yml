@@ -64,6 +64,7 @@ jobs:
     - name: Show GitVersion output
       run: |
         echo "GitVersion (fullSemVer): ${{ steps.gitversion.outputs.fullSemVer }}"
+        echo "GitVersion (nugetVersionV2): ${{ steps.gitversion.outputs.nugetVersionV2 }}"
         echo "GitVersion (branch): ${{ steps.gitversion.outputs.branchName }}"
 
     - name: Inject version into AssemblyInfo.cs
