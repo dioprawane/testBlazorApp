@@ -23,8 +23,13 @@ jobs:
       with:
         fetch-depth: 0  # Permet à GitVersion d’avoir l'historique complet
       
-    - name: Fetch full history to help GitVersion
-      run: git fetch --prune --unshallow --tags      
+    - name: Fetch full history (only if shallow)
+      run: |
+        if git rev-parse --is-shallow-repository | grep true; then
+          git fetch --prune --unshallow --tags
+        else
+          git fetch --prune --tags
+        fi        
 
     #- name: Cloner le projet de tests externes
       #run: git clone https://github.com/dioprawane/GestionBudgetTest.git TestsExternes
