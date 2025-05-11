@@ -204,6 +204,7 @@ Cette partie décrit les règles d’usages pour la gestion du repos. [Référen
 
 ### Commandes Versions 
 `dotnet-gitversion /updateassemblyinfo Properties/AssemblyInfo.cs /ensureassemblyinfo /config gitversion.yml`
+le dernier a renvoyé ceci : [assembly: AssemblyInformationalVersion("0.1.0-fusion-projets.1+94.Branch.fusion-projets.Sha.81850aae07665dc5eea85c9ab93bf1e7d3abcf29")]
 
 ## Contacts
 Pour toute question ou suggestion, n'hésitez pas à nous contacter :

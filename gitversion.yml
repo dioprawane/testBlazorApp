@@ -1,11 +1,23 @@
 mode: ContinuousDeployment
 next-version: 0.1.0
+
 branches:
   master:
     regex: ^master$
     increment: Minor
+    track-merge-target: true
+
   features:
     regex: ^features[/-]
     increment: Patch
+    track-merge-target: true
+
+  pull-request:
+    regex: ^(pull|pull-requests)/\d+/merge$
+    increment: Inherit
+    track-merge-target: true
+    # On ne précise pas source-branches, ce qui accepte toutes par défaut
+    # ou mets celles que tu veux : master, features, etc.
+
 ignore:
   sha: []
