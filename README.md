@@ -210,4 +210,5 @@ le dernier a renvoyé ceci : [assembly: AssemblyInformationalVersion("0.1.0-fusi
 Pour toute question ou suggestion, n'hésitez pas à nous contacter :
 - **Nom** : QUIDORT Joël : **Chef de projet** & DIOP Serigne Rawane : **Développeur**
 - **Email** : [serigne-rawane.diop@acoss.fr](mailto:votre.email@example.com)
-- **GitHub** : [dioprawane](https://github.com/dioprawane)
+- **GitHub** : [dioprawane](https://github.com/dioprawane)#   t e s t B l a z o r A p p  
+ 
