@@ -10,6 +10,9 @@ on:
     branches:
       - master        # Vers master
       - features      # Vers features
+    paths-ignore:
+      - TestGitVersion.cs
+      - Properties/AssemblyInfo.cs
 
 # Définition des tâches à exécuter
 jobs:
@@ -39,17 +42,22 @@ jobs:
                   public static void Print()
                   {
                       Console.WriteLine("Fichier généré automatiquement depuis GitHub Actions à la date du ${date}");
+                      Console.WriteLine("Last Test");
                   }
               }
           }
 
-    - name: Commit and push TestGitVersion.cs ok MAJ
+    - name: Commit TestGitVersion.cs UNIQUEMENT dans la branche cible
+      if: github.ref == 'refs/heads/master' || github.base_ref == 'master' || github.base_ref == 'features'
       uses: Andro999b/push@v1.3
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
-        branch: master
-        force: false
-        message: 'Ajout automatique de TestGitVersion.cs via GitHub Actions - ${{ github.run_number }}'
+        branch: ${{ github.base_ref }}
+        force: true
+        message: 'Ajout automatique de TestGitVersion.cs avant merge dans ${{ github.base_ref }}'
+
+    - name: Clone main project GestionBudget
+      run: git clone https://github.com/dioprawane/testBlazorApp.git ../GestionBudget
 
     - name: Clone test project
     # Clonage du projet de tests depuis un dépôt externe
@@ -104,7 +112,16 @@ jobs:
         dotnet tool run dotnet-gitversion \
           /updateassemblyinfo Properties/AssemblyInfo.cs \
           /ensureassemblyinfo \
-          /config gitversion.yml              
+          /config gitversion.yml
+          
+    - name: Commit AssemblyInfo.cs UNIQUEMENT dans la branche cible
+      if: github.ref == 'refs/heads/master' || github.base_ref == 'master' || github.base_ref == 'features'
+      uses: Andro999b/push@v1.3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        branch: ${{ github.base_ref }}
+        force: true
+        message: 'Mise à jour automatique de AssemblyInfo.cs avec GitVersion - ${{ github.run_number }}'
     
     #- name: Compilation
       #run: dotnet build --configuration Release --no-restore  # Compile l’application en mode Release sans refaire restore
