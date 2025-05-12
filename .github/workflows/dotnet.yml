@@ -43,7 +43,7 @@ jobs:
               }
           }
 
-    - name: Commit and push TestGitVersion.cs
+    - name: Commit and push TestGitVersion.cs ok
       uses: Andro999b/push@v1.3
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
