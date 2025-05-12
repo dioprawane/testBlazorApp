@@ -43,6 +43,14 @@ jobs:
               }
           }
 
+    - name: Commit and push TestGitVersion.cs
+      uses: Andro999b/push@v1.3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        branch: master
+        force: false
+        message: 'Ajout automatique de TestGitVersion.cs via GitHub Actions - ${{ github.run_number }}'
+
     - name: Clone test project
     # Clonage du projet de tests depuis un dépôt externe
       run: git clone https://github.com/dioprawane/GestionBudgetTest.git ../GestionBudgetTest
