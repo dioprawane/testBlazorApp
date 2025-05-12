@@ -153,3 +153,24 @@ jobs:
       with:
         name: TestResults
         path: ./TestResults
+
+    - name: Bump and push Git tag
+      if: github.ref == 'refs/heads/master'
+      run: |
+        echo "🔍 Récupération du dernier tag Git..."
+        last_tag=$(git describe --tags `git rev-list --tags --max-count=1`)
+        echo "🕓 Dernier tag détecté : $last_tag"
+
+        # Supprime le "v" du tag pour le manipuler facilement
+        version=${last_tag#v}
+        IFS='.' read -r major minor patch <<< "$version"
+
+        # Incrémente le dernier chiffre (patch)
+        patch=$((patch + 1))
+        new_tag="v$major.$minor.$patch"
+
+        echo "🏷️ Nouveau tag : $new_tag"
+        git config user.name "github-actions[bot]"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
+        git tag -a "$new_tag" -m "Version $new_tag"
+        git push origin "$new_tag"
