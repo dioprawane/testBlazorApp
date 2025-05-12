@@ -7,10 +7,11 @@ on:
     branches:
       - master        # Sur la branche master
   pull_request: # À chaque pull request
-    types: [closed]
     branches:
       - master        # Vers master
       - features      # Vers features
+    paths-ignore:
+      - TestGitVersion.cs
 
 # Définition des tâches à exécuter
 jobs:
@@ -44,13 +45,14 @@ jobs:
               }
           }
 
-    - name: Commit and push TestGitVersion.cs
+    - name: Commit TestGitVersion.cs UNIQUEMENT dans la branche cible
+      if: github.ref == 'refs/heads/master' || github.base_ref == 'master' || github.base_ref == 'features'
       uses: Andro999b/push@v1.3
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
-        branch: ${{ github.event.pull_request.base.ref }}
+        branch: ${{ github.base_ref }}
         force: true
-        message: 'Ajout automatique de TestGitVersion.cs via GitHub Actions - ${{ github.run_number }}'
+        message: 'Ajout automatique de TestGitVersion.cs avant merge dans ${{ github.base_ref }}'
 
     - name: Clone main project GestionBudget
       run: git clone https://github.com/dioprawane/testBlazorApp.git ../GestionBudget
