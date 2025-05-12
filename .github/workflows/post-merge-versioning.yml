@@ -4,7 +4,10 @@ on:
   push:
     branches:
       - master
-
+  pull_request: # À chaque pull request
+    branches:
+    - master        # Vers master
+    
 jobs:
   tag-and-commit-version:
     runs-on: ubuntu-latest
