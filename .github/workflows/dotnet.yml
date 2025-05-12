@@ -84,7 +84,7 @@ jobs:
     - name: Build project
     # Compile le projet principal avec la version générée
       #run: dotnet build --configuration Release --no-restore /p:Version=${{ steps.gitversion.outputs.fullSemVer }}
-      run: dotnet build GestionBudgétaire.csproj --configuration Release --no-restore /p:Version=${{ steps.gitversion.outputs.fullSemVer }}
+      run: dotnet build GestionBudgétaire.csproj --configuration Release --no-restore /p:Version=${{ steps.gitversion.outputs.assemblyFileVersion }}
 
     - name: Build test project
     # Compile le projet de test

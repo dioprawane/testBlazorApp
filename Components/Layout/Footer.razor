@@ -6,7 +6,6 @@
         <!-- Logo -->
         <div class="col-12 col-md-4 mb-2 mb-md-0 text-md-start text-center">
             <img src="logoU.svg" alt="Logo" style="height: 36px;" />
-            <p class="text-muted mb-lg-0">Urssaf Caisse Nationale - DAPM - PerfEco</p>
         </div>
 
         <!-- Liens -->
@@ -20,21 +19,26 @@
         <!-- Copyright & version -->
         <div class="col-12 col-md-4 text-md-end text-center">
             <small style="font-size: 0.8rem;">
-                © @DateTime.Now.Year Company Name Inc.<br />
-                Version: @_informationalVersion
+                © @DateTime.Now.Year Urssaf Caisse Nationale - DAPM - PerfEco.<br />
+                Version : @_fileVersion
+
             </small>
         </div>
     </div>
 </RadzenPanel>
 
 @code {
-    private string? _informationalVersion;
+    //private string? _informationalVersion;
+    private string? _fileVersion;
 
     protected override void OnInitialized()
     {
-        _informationalVersion = Assembly
+        _fileVersion = Assembly
             .GetExecutingAssembly()
-            .GetCustomAttribute<AssemblyInformationalVersionAttribute>()?
-            .InformationalVersion;
+            .GetCustomAttribute<AssemblyFileVersionAttribute>()?
+            .Version;
+		    // Pour afficher les infos complètes de la version, décommenter la ligne ci-dessous
+            //.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?
+            //.InformationalVersion;
     }
 }

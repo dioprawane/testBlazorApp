@@ -10,6 +10,7 @@ branches:
     regex: ^master$           # S'applique à la branche 'master' exactement
     increment: Minor          # Incrémente le numéro de version mineure (ex: 0.1.0 -> 0.2.0)
     track-merge-target: true  # Suivre les fusions vers cette branche
+    is-release-branch: true
 
   features:
     regex: ^features[/-]      # S'applique aux branches de type 'features/xyz' ou 'features-xyz'
@@ -25,3 +26,7 @@ branches:
 # Liste des commits à ignorer dans le calcul de version (vide ici)
 ignore:
   sha: [] # Aucun commit spécifique à ignorer
+
+assembly-versioning-scheme: MajorMinorPatchTag
+assembly-file-versioning-scheme: MajorMinorPatchTag
+commit-message-incrementing: Disabled
