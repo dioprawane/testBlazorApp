@@ -12,6 +12,7 @@ on:
       - features      # Vers features
     paths-ignore:
       - TestGitVersion.cs
+      - Properties/AssemblyInfo.cs
 
 # Définition des tâches à exécuter
 jobs:
@@ -111,7 +112,16 @@ jobs:
         dotnet tool run dotnet-gitversion \
           /updateassemblyinfo Properties/AssemblyInfo.cs \
           /ensureassemblyinfo \
-          /config gitversion.yml              
+          /config gitversion.yml
+          
+    - name: Commit AssemblyInfo.cs UNIQUEMENT dans la branche cible
+      if: github.ref == 'refs/heads/master' || github.base_ref == 'master' || github.base_ref == 'features'
+      uses: Andro999b/push@v1.3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        branch: ${{ github.base_ref }}
+        force: true
+        message: 'Mise à jour automatique de AssemblyInfo.cs avec GitVersion - ${{ github.run_number }}'
     
     #- name: Compilation
       #run: dotnet build --configuration Release --no-restore  # Compile l’application en mode Release sans refaire restore
