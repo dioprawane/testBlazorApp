@@ -19,19 +19,18 @@ jobs:
     # Liste des actions à effectuer
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v4  # Clone le code source du dépôt
+      uses: actions/checkout@v4  # Clone le code source du dépôt/Récupère les fichiers du dépôt
       with:
         fetch-depth: 0  # Permet à GitVersion d’avoir l'historique complet   
 
-    #- name: Cloner le projet de tests externes
-      #run: git clone https://github.com/dioprawane/GestionBudgetTest.git TestsExternes
-    - name: Cloner le projet de tests externes
+    - name: Clone test project
+    # Clonage du projet de tests depuis un dépôt externe
       run: git clone https://github.com/dioprawane/GestionBudgetTest.git ../GestionBudgetTest
 
-    - name: Installation .NET du sdk
+    - name: Install .NET sdk
       uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: '8.0.302'  # Installe la version spécifique .NET 8.0.302 du SDK 
+        dotnet-version: '8.0.302'  # Installe la version 8.0.302 .NET du SDK 
 
     # Ces étapes sont utilisées pour se connecter à MySQL
     # - name: Set environment variables
@@ -48,24 +47,29 @@ jobs:
 
     - name: Intallation/Restauration des dépendances
       #run: dotnet restore    # Restaure/installe les dépendances NuGet
+      # Restaure/installe les dépendances NuGet des projets de base et de tests
       run: |
         dotnet restore GestionBudgétaire.csproj
         dotnet restore ../GestionBudgetTest/GestionBudgetaireTest.csproj
 
-    - name: Install GitVersion
+    - name: Install GitVersion 
+    # Installer la version 6.3.0 de GitVersion (outil de gestion de version basé sur Git)
       uses: gittools/actions/gitversion/setup@v0.12.0
       with:
         versionSpec: '6.3.0'
 
     - name: Run GitVersion
+    # Exécute GitVersion pour générer les métadonnées de version
       id: gitversion
       uses: gittools/actions/gitversion/execute@v0.12.0
 
     - name: Show GitVersion output
+    # Affiche la version générée par GitVersion dans les logs
       run: |
         echo "GitVersion (fullSemVer): ${{ steps.gitversion.outputs.fullSemVer }}"
 
     - name: Inject version into AssemblyInfo.cs
+    # Injecte la version GitVersion dans le fichier AssemblyInfo.cs
       run: |
         dotnet new tool-manifest --force
         dotnet tool install GitVersion.Tool --version 6.3.0
@@ -73,23 +77,22 @@ jobs:
           /updateassemblyinfo Properties/AssemblyInfo.cs \
           /ensureassemblyinfo \
           /config gitversion.yml              
-
-    #- name: Inject version in AssemblyInfo.cs
-      #run: |
-        #dotnet-gitversion /updateassemblyinfo GestionBudgétaire/Properties/AssemblyInfo.cs /ensureassemblyinfo /config gitversion.yml      
     
     #- name: Compilation
       #run: dotnet build --configuration Release --no-restore  # Compile l’application en mode Release sans refaire restore
 
-    - name: Compilation du projet
+    - name: Build project
+    # Compile le projet principal avec la version générée
       #run: dotnet build --configuration Release --no-restore /p:Version=${{ steps.gitversion.outputs.fullSemVer }}
       run: dotnet build GestionBudgétaire.csproj --configuration Release --no-restore /p:Version=${{ steps.gitversion.outputs.fullSemVer }}
 
-    - name: Build du projet de tests
+    - name: Build test project
+    # Compile le projet de test
       run: |
         dotnet build ../GestionBudgetTest/GestionBudgetaireTest.csproj --no-restore --verbosity quiet
     
-    - name: Lancer les tests avec affichage console et rapport TRX
+    - name: Run tests
+    # Exécute les tests avec sortie console détaillée et export au format TRX
       run: |
         dotnet test ../GestionBudgetTest/GestionBudgetaireTest.csproj \
           --no-restore \
@@ -100,6 +103,7 @@ jobs:
           --results-directory ./TestResults       
         
     - name: Upload test results
+    # Envoie les résultats des tests (fichier TRX) comme artefact GitHub Actions
       uses: actions/upload-artifact@v4
       with:
         name: TestResults
