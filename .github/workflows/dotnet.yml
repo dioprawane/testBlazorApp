@@ -13,6 +13,9 @@ on:
     paths-ignore:
       - TestGitVersion.cs
       - Properties/AssemblyInfo.cs
+  # ✅ Ce bloc déclenche quand une PR est **fermée (close ou merge)**
+  pull_request_target:
+    types: [closed]
 
 # Définition des tâches à exécuter
 jobs:
@@ -154,23 +157,50 @@ jobs:
         name: TestResults
         path: ./TestResults
 
-    - name: Bump and push Git tag
-      if: github.ref == 'refs/heads/master'
-      run: |
-        echo "🔍 Récupération du dernier tag Git..."
-        last_tag=$(git describe --tags `git rev-list --tags --max-count=1`)
-        echo "🕓 Dernier tag détecté : $last_tag"
+  post-merge-versioning:
+    if: github.event.pull_request.merged == true && github.base_ref == 'master'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-        # Supprime le "v" du tag pour le manipuler facilement
-        version=${last_tag#v}
-        IFS='.' read -r major minor patch <<< "$version"
+      - name: Setup Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
 
-        # Incrémente le dernier chiffre (patch)
-        patch=$((patch + 1))
-        new_tag="v$major.$minor.$patch"
+      - name: Install GitVersion
+        uses: gittools/actions/gitversion/setup@v0.12.0
+        with:
+          versionSpec: '6.3.0'
 
-        echo "🏷️ Nouveau tag : $new_tag"
-        git config user.name "github-actions[bot]"
-        git config user.email "github-actions[bot]@users.noreply.github.com"
-        git tag -a "$new_tag" -m "Version $new_tag"
-        git push origin "$new_tag"
+      - name: Run GitVersion
+        id: gitversion
+        uses: gittools/actions/gitversion/execute@v0.12.0
+
+      - name: Write version to AssemblyInfo.cs
+        uses: DamianReeves/write-file-action@master
+        with:
+          path: Properties/AssemblyInfo.cs
+          write-mode: overwrite
+          contents: |
+            using System.Reflection;
+            [assembly: AssemblyVersion("${{ steps.gitversion.outputs.assemblySemVer }}")]
+            [assembly: AssemblyFileVersion("${{ steps.gitversion.outputs.assemblyFileVersion }}")]
+            [assembly: AssemblyInformationalVersion("${{ steps.gitversion.outputs.informationalVersion }}")]
+
+      - name: Commit AssemblyInfo.cs (post-merge)
+        uses: Andro999b/push@v1.3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: master
+          force: true
+          message: '🔄 Mise à jour AssemblyInfo.cs après fusion PR #${{ github.event.pull_request.number }}'
+
+      - name: Tag & Push version
+        run: |
+          version=${{ steps.gitversion.outputs.semVer }}
+          git tag -a "v$version" -m "Version $version"
+          git push origin "v$version"
