@@ -51,6 +51,9 @@ jobs:
         force: false
         message: 'Ajout automatique de TestGitVersion.cs via GitHub Actions - ${{ github.run_number }}'
 
+    - name: Clone main project GestionBudget
+      run: git clone https://github.com/dioprawane/GestionBudget.git ../GestionBudget
+
     - name: Clone test project
     # Clonage du projet de tests depuis un dépôt externe
       run: git clone https://github.com/dioprawane/GestionBudgetTest.git ../GestionBudgetTest
