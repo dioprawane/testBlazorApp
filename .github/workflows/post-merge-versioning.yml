@@ -1,0 +1,54 @@
+name: Post Merge Versioning
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  tag-and-commit-version:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Install GitVersion
+        uses: gittools/actions/gitversion/setup@v0.12.0
+        with:
+          versionSpec: '6.3.0'
+
+      - name: Run GitVersion
+        id: gitversion
+        uses: gittools/actions/gitversion/execute@v0.12.0
+
+      - name: Write version to AssemblyInfo.cs
+        uses: DamianReeves/write-file-action@master
+        with:
+          path: Properties/AssemblyInfo.cs
+          write-mode: overwrite
+          contents: |
+            using System.Reflection;
+            [assembly: AssemblyVersion("${{ steps.gitversion.outputs.assemblySemVer }}")]
+            [assembly: AssemblyFileVersion("${{ steps.gitversion.outputs.assemblyFileVersion }}")]
+            [assembly: AssemblyInformationalVersion("${{ steps.gitversion.outputs.informationalVersion }}")]
+
+      - name: Commit AssemblyInfo.cs
+        uses: Andro999b/push@v1.3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: master
+          force: true
+          message: '🔄 Mise à jour AssemblyInfo.cs après merge dans master'
+
+      - name: Tag & Push version
+        run: |
+          version=${{ steps.gitversion.outputs.semVer }}
+          git tag -a "v$version" -m "Version $version"
+          git push origin "v$version"
