@@ -1,0 +1,11 @@
+﻿.footer-link-dark {
+    color: #1c1f23;
+    font-weight: 500;
+    font-size: 0.9rem;
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+    .footer-link-dark:hover {
+        color: #000000;
+    }

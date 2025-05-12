@@ -1,0 +1,40 @@
+﻿@using System.Reflection
+@using Radzen
+
+<RadzenPanel Style="background-color: #e8c600; color: #1c1f23; padding: 1rem 2rem;">
+    <div class="row align-items-center justify-content-between text-center text-md-start">
+        <!-- Logo -->
+        <div class="col-12 col-md-4 mb-2 mb-md-0 text-md-start text-center">
+            <img src="logoU.svg" alt="Logo" style="height: 36px;" />
+            <p class="text-muted mb-lg-0">Urssaf Caisse Nationale - DAPM - PerfEco</p>
+        </div>
+
+        <!-- Liens -->
+        <div class="col-12 col-md-4 mb-2 mb-md-0 d-flex justify-content-center flex-wrap gap-3">
+            <RadzenLink Path="/" Text="Home" class="footer-link-dark" />
+            <RadzenLink Path="#" Text="Support" class="footer-link-dark" />
+            <RadzenLink Path="#" Text="Documentation" class="footer-link-dark" />
+            <RadzenLink Path="#" Text="PerfEco" class="footer-link-dark" />
+        </div>
+
+        <!-- Copyright & version -->
+        <div class="col-12 col-md-4 text-md-end text-center">
+            <small style="font-size: 0.8rem;">
+                © @DateTime.Now.Year Company Name Inc.<br />
+                Version: @_informationalVersion
+            </small>
+        </div>
+    </div>
+</RadzenPanel>
+
+@code {
+    private string? _informationalVersion;
+
+    protected override void OnInitialized()
+    {
+        _informationalVersion = Assembly
+            .GetExecutingAssembly()
+            .GetCustomAttribute<AssemblyInformationalVersionAttribute>()?
+            .InformationalVersion;
+    }
+}
