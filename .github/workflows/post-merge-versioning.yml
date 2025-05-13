@@ -1,77 +1,58 @@
-name: Post Merge Versioning
+name: Post‑merge versioning
 
 on:
   push:
-    branches:
-      - master
-  pull_request: # À chaque pull request
-    branches:
-    - master        # Vers master
-    
+    branches: [ master ]
+
 jobs:
-  tag-and-commit-version:
+  version:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Setup Git
-        run: |
-          git config user.name "github-actions[bot]"
+      - run: |
+          git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-      - name: Install GitVersion
-        uses: gittools/actions/gitversion/setup@v0.12.0
+      - uses: gittools/actions/gitversion/setup@v0.12.0
         with:
           versionSpec: '6.3.0'
 
-      - name: Write temporary GitVersion config to force minor increment
+      - id: gitversion
+        uses: gittools/actions/gitversion/execute@v0.12.0
+
+      - name: Force minor increment and write AssemblyInfo.cs
         run: |
-          cat <<EOF > gitversion.temp.yml
-          mode: ContinuousDeployment
-          next-version: 0.1.0
-          branches:
-            master:
-              regex: ^master$
-              increment: Minor
-              track-merge-target: true
-              is-release-branch: true
-          ignore:
-            sha: []
-          assembly-versioning-scheme: MajorMinorPatchTag
-          assembly-file-versioning-scheme: MajorMinorPatchTag
-          commit-message-incrementing: Disabled
+          major="${{ steps.gitversion.outputs.major }}"
+          minor="${{ steps.gitversion.outputs.minor }}"
+          patch="${{ steps.gitversion.outputs.patch }}"
+          build="${{ steps.gitversion.outputs.buildMetaData }}"
+
+          # Incrément manuel du minor
+          new_minor=$((minor + 1))
+          new_version="$major.$new_minor.$patch.$build"
+
+          echo "New version: $new_version"
+
+          cat > Properties/AssemblyInfo.cs <<EOF
+          using System.Reflection;
+          [assembly: AssemblyVersion("$new_version")]
+          [assembly: AssemblyFileVersion("$new_version")]
+          [assembly: AssemblyInformationalVersion("$new_version")]
           EOF
 
-      - name: Run GitVersion with override config
-        id: gitversion
-        uses: gittools/actions/gitversion/execute@v0.12.0
-        with:
-          configFilePath: gitversion.temp.yml
-
-      - name: Write version to AssemblyInfo.cs
-        uses: DamianReeves/write-file-action@master
-        with:
-          path: Properties/AssemblyInfo.cs
-          write-mode: overwrite
-          contents: |
-            using System.Reflection;
-            [assembly: AssemblyVersion("${{ steps.gitversion.outputs.assemblySemVer }}")]
-            [assembly: AssemblyFileVersion("${{ steps.gitversion.outputs.assemblyFileVersion }}")]
-            [assembly: AssemblyInformationalVersion("${{ steps.gitversion.outputs.informationalVersion }}")]
-
       - name: Commit AssemblyInfo.cs
-        uses: Andro999b/push@v1.3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          branch: master
-          force: true
-          message: 'Mise à jour AssemblyInfo.cs après merge dans master'
-
-      - name: Tag & Push version
         run: |
-          version=${{ steps.gitversion.outputs.semVer }}
-          git tag -a "v$version" -m "Version $version"
-          git push origin "v$version"
+          if [[ $(git status --porcelain) ]]; then
+            git add Properties/AssemblyInfo.cs
+            git commit -m "chore: force minor bump to ${{ steps.gitversion.outputs.major }}.$((steps.gitversion.outputs.minor + 1)).${{ steps.gitversion.outputs.patch }} [skip ci]"
+            git push
+          fi
+
+      - name: Tag new version
+        run: |
+          TAG="v${{ steps.gitversion.outputs.major }}.$((steps.gitversion.outputs.minor + 1)).${{ steps.gitversion.outputs.patch }}"
+          git tag -a "$TAG" -m "Version $TAG"
+          git push origin "$TAG"
