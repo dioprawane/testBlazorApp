@@ -3,6 +3,9 @@ name: Post-merge versioning
 on:
   push:
     branches: [ master ]
+  pull_request: # À chaque pull request
+    branches:
+      - master        # Vers master
 
 jobs:
   version:
