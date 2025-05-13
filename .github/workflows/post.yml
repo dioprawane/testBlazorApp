@@ -2,8 +2,7 @@ name: Post-merge versioning
 
 on:
   push:
-    branches: #ok
-      - master 
+    branches: [ master ]
 
 jobs:
   version:
