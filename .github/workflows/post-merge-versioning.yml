@@ -27,9 +27,29 @@ jobs:
         with:
           versionSpec: '6.3.0'
 
-      - name: Run GitVersion
+      - name: Write temporary GitVersion config to force minor increment
+        run: |
+          cat <<EOF > gitversion.temp.yml
+          mode: ContinuousDeployment
+          next-version: 0.1.0
+          branches:
+            master:
+              regex: ^master$
+              increment: Minor
+              track-merge-target: true
+              is-release-branch: true
+          ignore:
+            sha: []
+          assembly-versioning-scheme: MajorMinorPatchTag
+          assembly-file-versioning-scheme: MajorMinorPatchTag
+          commit-message-incrementing: Disabled
+          EOF
+
+      - name: Run GitVersion with override config
         id: gitversion
         uses: gittools/actions/gitversion/execute@v0.12.0
+        with:
+          configFilePath: gitversion.temp.yml
 
       - name: Write version to AssemblyInfo.cs
         uses: DamianReeves/write-file-action@master
@@ -48,7 +68,7 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           branch: master
           force: true
-          message: '🔄 Mise à jour AssemblyInfo.cs après merge dans master'
+          message: 'Mise à jour AssemblyInfo.cs après merge dans master'
 
       - name: Tag & Push version
         run: |
