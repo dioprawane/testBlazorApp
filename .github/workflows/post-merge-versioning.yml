@@ -48,9 +48,13 @@ jobs:
 
       - name: Commit AssemblyInfo.cs
         run: |
+          current_minor=${{ steps.gitversion.outputs.minor }}
+          next_minor=$((current_minor + 1))
+          patch=${{ steps.gitversion.outputs.patch }}
+
           if [[ $(git status --porcelain) ]]; then
             git add Properties/AssemblyInfo.cs
-            git commit -m "chore: force minor bump to ${{ steps.gitversion.outputs.major }}.$((steps.gitversion.outputs.minor + 1)).${{ steps.gitversion.outputs.patch }} [skip ci]"
+            git commit -m "chore: force minor bump to 0.${next_minor}.${patch} [skip ci]"
             git push
           fi
 
