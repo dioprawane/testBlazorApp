@@ -1,8 +1,9 @@
-name: Post‑merge versioning
+name: Post-merge versioning
 
 on:
   push:
-    branches: [ master ]
+    branches:
+      - master 
 
 jobs:
   version:
