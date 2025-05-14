@@ -24,14 +24,6 @@ branches:
     track-merge-target: true                # Suivre les PR fusionnées
     label: ''                               # Pas de suffixe spécial ajouté dans la version
 
-  pull-request-features:
-    regex: ^(pull|pull-requests)/\d+/merge$
-    source-branches: [features]
-    #increment: Patch
-    increment: Minor
-    label: pr-features
-    track-merge-target: true
-
 # Liste des commits à ignorer dans le calcul de version (vide ici)
 ignore:
   sha: [] # Aucun commit spécifique à ignorer
