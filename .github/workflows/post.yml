@@ -61,7 +61,7 @@ jobs:
           if [[ $(git status --porcelain) ]]; then
             git add Properties/AssemblyInfo.cs
             git commit -m "chore: force minor bump to 0.${next_minor}.${patch} [skip ci]"
-            git push origin master
+            git push --force origin master
           fi
 
       - name: Tag new version
@@ -73,4 +73,4 @@ jobs:
           TAG="v0.${next_minor}.${patch}"
 
           git tag -a "$TAG" -m "Version $TAG"
-          git push origin "$TAG"
+          git push --force origin "$TAG"
