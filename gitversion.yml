@@ -8,12 +8,17 @@ next-version: 0.1.0
 branches:
   master:
     regex: ^master$           # S'applique à la branche 'master' exactement
-    increment: Major          # Incrémente le numéro de version mineure (ex: 0.1.0 -> 0.2.0)
+    increment: Minor          # Incrémente le numéro de version mineure (ex: 0.1.0 -> 0.2.0)
     track-merge-target: true  # Suivre les fusions vers cette branche
     is-release-branch: true
 
   features:
     regex: ^features[/-]      # S'applique aux branches de type 'features/xyz' ou 'features-xyz'
+    increment: Minor          # Incrémente uniquement la version de correctif (ex: 0.1.0 -> 0.1.1)
+    track-merge-target: true  # Suivre les fusions vers cette branche
+
+  features:
+    regex: ^features$      # S'applique aux branches de type 'features/xyz' ou 'features-xyz'
     increment: Minor          # Incrémente uniquement la version de correctif (ex: 0.1.0 -> 0.1.1)
     track-merge-target: true  # Suivre les fusions vers cette branche
 
@@ -25,7 +30,7 @@ branches:
 
 # Liste des commits à ignorer dans le calcul de version (vide ici)
 ignore:
-  sha: [] # Aucun commit spécifique à ignorer
+  sha: [] # Aucun commit spécifique à ignorer hj
 
 assembly-versioning-scheme: MajorMinorPatchTag
 assembly-file-versioning-scheme: MajorMinorPatchTag
