@@ -164,8 +164,9 @@ jobs:
         git config user.email "github-actions[bot]@users.noreply.github.com"
 
         # Vérifie si le tag existe déjà
+        # VERIFIER LE NEW TAG
         if git tag | grep -q "v$VERSION"; then
-          echo "⚠️ Tag v$VERSION déjà existant. Aucune action effectuée."
+          echo "Tag v$VERSION déjà existant. Aucune action effectuée."
           exit 0
         fi
 
