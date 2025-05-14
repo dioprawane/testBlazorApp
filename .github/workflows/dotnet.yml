@@ -3,7 +3,7 @@ name: .NET Actions
 
 # Quand déclencher ce workflow
 on:
-  push: # À chaque push
+  push: # À chaque push test tag
     branches:
       - master        # Sur la branche master
   pull_request: # À chaque pull request
