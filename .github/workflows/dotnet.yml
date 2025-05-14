@@ -165,6 +165,7 @@ jobs:
 
         # Vérifie si le tag existe déjà retester
         # VERIFIER LE NEW TAG
+        # Test new tag
         if git tag | grep -q "v$VERSION"; then
           echo "Tag v$VERSION déjà existant. Aucune action effectuée."
           exit 0
