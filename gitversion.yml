@@ -26,7 +26,8 @@ branches:
   pull-request-features:
     regex: ^(pull|pull-requests)/\d+/merge$
     source-branches: [features]
-    increment: Patch
+    #increment: Patch
+    increment: Minor
     label: pr-features
     track-merge-target: true
 
