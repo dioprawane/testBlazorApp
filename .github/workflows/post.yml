@@ -27,7 +27,7 @@ jobs:
         uses: gittools/actions/gitversion/execute@v0.12.0
 
       - name: Force minor increment and write AssemblyInfo.cs
-        if: github.ref == 'refs/heads/master'
+        if: github.ref_name == 'master'
         run: |
           major=${{ steps.gitversion.outputs.major }}
           minor=${{ steps.gitversion.outputs.minor }}
@@ -48,7 +48,7 @@ jobs:
           EOF
 
       - name: Commit AssemblyInfo.cs
-        if: github.ref == 'refs/heads/master'
+        if: github.ref_name == 'master'
         run: |
           minor=${{ steps.gitversion.outputs.minor }}
           next_minor=$((minor + 1))
@@ -61,7 +61,7 @@ jobs:
           fi
 
       - name: Tag new version
-        if: github.ref == 'refs/heads/master'
+        if: github.ref_name == 'master'
         run: |
           minor=${{ steps.gitversion.outputs.minor }}
           next_minor=$((minor + 1))
