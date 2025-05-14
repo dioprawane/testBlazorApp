@@ -157,7 +157,7 @@ jobs:
     - name: Tag version après merge dans master
       if: github.ref == 'refs/heads/master' || github.base_ref == 'master'
       run: |
-        VERSION=${{ steps.gitversion.outputs.semVer }}
+        VERSION=${{ steps.gitversion.outputs.majorMinorPatch }}
         echo "Version générée : $VERSION"
 
         git config user.name "github-actions[bot]"
