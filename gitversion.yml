@@ -13,13 +13,8 @@ branches:
     is-release-branch: true
 
   features:
-    regex: ^features[/-]      # S'applique aux branches de type 'features/xyz' ou 'features-xyz'
-    increment: Minor          # Incrémente uniquement la version de correctif (ex: 0.1.0 -> 0.1.1)
-    track-merge-target: true  # Suivre les fusions vers cette branche
-
-  features:
     regex: ^features$      # S'applique aux branches de type 'features/xyz' ou 'features-xyz'
-    increment: Minor          # Incrémente uniquement la version de correctif (ex: 0.1.0 -> 0.1.1)
+    increment: Patch         # Incrémente uniquement la version de correctif (ex: 0.1.0 -> 0.1.1)
     track-merge-target: true  # Suivre les fusions vers cette branche
 
   pull-request:

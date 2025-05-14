@@ -153,3 +153,21 @@ jobs:
       with:
         name: TestResults
         path: ./TestResults
+
+    - name: Tag version après merge dans master
+      if: github.ref == 'refs/heads/master'
+      run: |
+        VERSION=${{ steps.gitversion.outputs.semVer }}
+        echo "Version générée : $VERSION"
+
+        git config user.name "github-actions[bot]"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
+
+        # Vérifie si le tag existe déjà
+        if git tag | grep -q "v$VERSION"; then
+          echo "⚠️ Tag v$VERSION déjà existant. Aucune action effectuée."
+          exit 0
+        fi
+
+        git tag "v$VERSION" -m "Version $VERSION"
+        git push origin "v$VERSION"
