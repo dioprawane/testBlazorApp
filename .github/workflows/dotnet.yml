@@ -153,3 +153,33 @@ jobs:
       with:
         name: TestResults
         path: ./TestResults
+
+    - name: Force minor increment and write AssemblyInfo.cs
+      if: github.ref == 'refs/heads/master' || github.base_ref == 'master'
+      run: |
+        major=${{ steps.gitversion.outputs.major }}
+        minor=${{ steps.gitversion.outputs.minor }}
+        patch=${{ steps.gitversion.outputs.patch }}
+        build=${{ steps.gitversion.outputs.buildMetaData }}
+
+        new_minor=$((minor + 1))
+        new_version="$major.$new_minor.$patch.$build"
+
+        echo "New version: $new_version"
+
+        mkdir -p Properties
+        cat > Properties/AssemblyInfo.cs <<EOF
+        using System.Reflection;
+        [assembly: AssemblyVersion("$new_version")]
+        [assembly: AssemblyFileVersion("$new_version")]
+        [assembly: AssemblyInformationalVersion("$new_version")]
+        EOF
+
+    - name: Commit AssemblyInfo.cs (bumped version) after increment
+      if: github.ref == 'refs/heads/master' || github.base_ref == 'master'
+      uses: Andro999b/push@v1.3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        branch: master
+        force: true
+        message: 'Mise à jour version AssemblyInfo.cs (bump minor) - ${{ github.run_number }}'
