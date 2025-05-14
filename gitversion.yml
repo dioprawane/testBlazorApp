@@ -19,7 +19,8 @@ branches:
 
   pull-request:
     regex: ^(pull|pull-requests)/\d+/merge$ # S'applique aux branches de pull request créées par GitHub
-    increment: Inherit                      # Hérite de la stratégie d'incrémentation de la branche source
+    #increment: Inherit                      # Hérite de la stratégie d'incrémentation de la branche source
+    increment: Patch
     track-merge-target: true                # Suivre les PR fusionnées
     label: ''                               # Pas de suffixe spécial ajouté dans la version
 
