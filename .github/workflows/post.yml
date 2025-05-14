@@ -26,6 +26,10 @@ jobs:
       - id: gitversion
         uses: gittools/actions/gitversion/execute@v0.12.0
 
+      - name: Wait for 30 seconds
+        if: github.ref == 'refs/heads/master' || github.base_ref == 'master'
+        run: sleep 59
+
       - name: Force minor increment and write AssemblyInfo.cs
         if: github.ref == 'refs/heads/master' || github.base_ref == 'master'
         run: |
