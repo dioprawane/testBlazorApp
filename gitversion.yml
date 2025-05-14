@@ -8,18 +8,18 @@ next-version: 0.1.0
 branches:
   master:
     regex: ^master$           # S'applique à la branche 'master' exactement
-    increment: Minor          # Incrémente le numéro de version mineure (ex: 0.1.0 -> 0.2.0)
+    increment: Major          # Incrémente le numéro de version mineure (ex: 0.1.0 -> 0.2.0)
     track-merge-target: true  # Suivre les fusions vers cette branche
     is-release-branch: true
 
   features:
     regex: ^features[/-]      # S'applique aux branches de type 'features/xyz' ou 'features-xyz'
-    increment: Patch          # Incrémente uniquement la version de correctif (ex: 0.1.0 -> 0.1.1)
+    increment: Minor          # Incrémente uniquement la version de correctif (ex: 0.1.0 -> 0.1.1)
     track-merge-target: true  # Suivre les fusions vers cette branche
 
   pull-request:
     regex: ^(pull|pull-requests)/\d+/merge$ # S'applique aux branches de pull request créées par GitHub
-    increment: Major
+    increment: Patch
     track-merge-target: true                # Suivre les PR fusionnées
     label: ''                               # Pas de suffixe spécial ajouté dans la version
 
