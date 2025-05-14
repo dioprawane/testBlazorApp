@@ -3,7 +3,7 @@ name: Post-merge versioning
 on:
   push:
     branches: [ master ]
-  pull_request: # À chaque pull request
+  pull_request: # À chaque pull request jkhqskjrdghjkdg
     branches:
       - master        # Vers master
 
