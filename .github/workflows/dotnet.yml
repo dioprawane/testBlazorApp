@@ -154,7 +154,7 @@ jobs:
         name: TestResults
         path: ./TestResults
 
-    - name: Force minor increment and write AssemblyInfo.cs
+    - name: Patch increment and write AssemblyInfo.cs to master
       if: github.ref == 'refs/heads/master' || github.base_ref == 'master'
       run: |
         # Récupération des valeurs GitVersion déjà générées
@@ -165,12 +165,12 @@ jobs:
         # Découper la version SemVer (ex: 0.2.2.24) en morceaux
         IFS='.' read -r major minor patch build <<< "$fullFileVer"
 
-        # Incrémenter le minor
-        new_minor=$((minor + 1))
+        # Incrémenter le patch
+        new_patch=$((patch + 1))
 
         # Recomposer les nouvelles versions avec les anciens suffixes conservés
-        new_ver="$major.$new_minor.$patch.$build"
-        new_infoVer=$(echo "$infoVer" | sed -E "s/^$major\.$minor\.$patch/$major.$new_minor.$patch/")
+        new_ver="$major.$minor.$new_patch.$build"
+        new_infoVer=$(echo "$infoVer" | sed -E "s/^$major\.$minor\.$patch/$major.$minor.$new_patch/")
 
         echo "New version: $new_ver"
         echo "Informational: $new_infoVer"
@@ -183,7 +183,7 @@ jobs:
         [assembly: AssemblyInformationalVersion("$new_infoVer")]
         EOF
 
-    - name: Commit AssemblyInfo.cs (bumped version) after increment
+    - name: Commit AssemblyInfo.cs after increment patch master version
       if: github.ref == 'refs/heads/master' || github.base_ref == 'master'
       uses: Andro999b/push@v1.3
       with:
